@@ -1,0 +1,44 @@
+import React from "react";
+
+const Button = ({
+  onClick,
+  size = "sm",
+  type = "default",
+  className = "",
+  children,
+  disabled = false,
+  ...props
+}) => {
+  return (
+    <button
+      className={`relative rounded-lg cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 active:scale-95
+        ${
+          type === "default"
+            ? "text-white bg-primary"
+            : "bg-transparent border-2 border-primary text-white"
+        }
+        ${size === "sm" ? "px-4 py-3 text-sm" : "px-8 py-5 text-base"}
+        ${className}
+      `}
+      onClick={onClick}
+      {...props}
+      disabled={disabled}
+      style={{
+        backgroundImage:
+          type === "default"
+            ? "radial-gradient(circle, #864fcb00, #864fcb73)"
+            : "none",
+        boxShadow:
+          type === "default"
+            ? "inset 2px 2px 5px rgba(255, 255, 255, 0.2), inset -2px -2px 5px rgba(0, 0, 0, 0.2)"
+            : "none",
+        borderRadius: "10px",
+        transition: "box-shadow 0.2s ease, transform 0.2s ease",
+      }}
+    >
+      {children}
+    </button>
+  );
+};
+
+export default Button;
