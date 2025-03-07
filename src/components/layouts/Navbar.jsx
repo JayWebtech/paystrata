@@ -42,7 +42,7 @@ const Navbar = () => {
       </motion.div>
       {isOpen && (
         <motion.div
-          className="md:hidden mt-4 bg-transparent backdrop-blur-2xl p-4 border-[1px] border-[#1e1e1e] rounded-2xl"
+          className="md:hidden mt-4 bg-transparent backdrop-blur-2xl p-4 border-[1px] border-stroke rounded-2xl"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
