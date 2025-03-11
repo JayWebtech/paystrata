@@ -1,6 +1,7 @@
 import { Orbitron, Sora } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { Toaster } from "react-hot-toast";
 
 const sora = Sora({
   variable: "--font-sora",
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${sora.variable} ${orbitron.variable} antialiased`}>
+        <Toaster />
         <Providers>{children}</Providers>
       </body>
     </html>

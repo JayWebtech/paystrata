@@ -3,20 +3,68 @@ import React, { useState } from "react";
 import InputField from "../form/InputField";
 import Tabs from "./Tabs";
 import Button from "../form/Button";
+import axios from "axios";
+import toast from "react-hot-toast";
+import SelectField from "../form/SelectField";
+import { GetDataPlans } from "@/services/endpoints";
 
 const providers = [
-  { name: "MTN", logo: "/logos/mtn.jpg", prefixes: ["0803", "0703", "0903", "0806", "0706", "0813", "0810", "0814", "0816", "0906", "0913"] },
-  { name: "Glo", logo: "/logos/glo.svg", prefixes: ["0805", "0807", "0705", "0811", "0815", "0905", "0915"] },
-  { name: "Airtel", logo: "/logos/airtel.jpg", prefixes: ["0802", "0808", "0708", "0701", "0812", "0901", "0902", "0904", "0907", "0912"] },
-  { name: "9Mobile", logo: "/logos/9mobile.jpg", prefixes: ["0809", "0817", "0818", "0908", "0909"] },
+  {
+    name: "MTN",
+    logo: "/logos/mtn.jpg",
+    code: "BIL104",
+    prefixes: [
+      "0803",
+      "0703",
+      "0903",
+      "0806",
+      "0706",
+      "0813",
+      "0810",
+      "0814",
+      "0816",
+      "0906",
+      "0913",
+    ],
+  },
+  {
+    name: "Glo",
+    logo: "/logos/glo.svg",
+    code: "BIL105",
+    prefixes: ["0805", "0807", "0705", "0811", "0815", "0905", "0915"],
+  },
+  {
+    name: "Airtel",
+    logo: "/logos/airtel.jpg",
+    code: "BIL106",
+    prefixes: [
+      "0802",
+      "0808",
+      "0708",
+      "0701",
+      "0812",
+      "0901",
+      "0902",
+      "0904",
+      "0907",
+      "0912",
+    ],
+  },
+  {
+    name: "9Mobile",
+    logo: "/logos/9mobile.jpg",
+    code: "BIL107",
+    prefixes: ["0809", "0817", "0818", "0908", "0909"],
+  },
 ];
 
 const PurchaseForm = () => {
   const [activeTab, setActiveTab] = useState("buy-data");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [networkLogo, setNetworkLogo] = useState(null);
+  const [dataPlans, setDataPlans] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
-  // Function to detect network provider
   const detectProvider = (number) => {
     if (number.length >= 4) {
       const prefix = number.slice(0, 4);
@@ -24,6 +72,9 @@ const PurchaseForm = () => {
 
       if (provider) {
         setNetworkLogo(provider.logo);
+        if(!dataPlans){
+          getDataPlans(provider.code);
+        }
       } else {
         setNetworkLogo(null);
       }
@@ -37,6 +88,19 @@ const PurchaseForm = () => {
     setPhoneNumber(value);
     detectProvider(value);
   };
+
+  const getDataPlans = async (code) => {
+    try {
+      const response = await GetDataPlans(code);
+
+      if (response.data.status == "success") {
+        setDataPlans(response.data.data);
+      }
+    } catch (error) {
+     // toast.error(error?.message || "Failed to fetch data plans");
+    }
+  };
+  
 
   return (
     <div className="container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 pt-10">
@@ -55,7 +119,15 @@ const PurchaseForm = () => {
                 type="numeric"
                 max={11}
               />
-              <InputField label="Data Plan" placeholder="Select data plan" />
+              {dataPlans && (
+                <SelectField
+                  value={selectedNetwork}
+                  onChange={(e) => setSelectedPlan(e.target.value)}
+                  label="Select data plans"
+                  options={selectedPlan}
+                  required={true}
+                />
+              )}
             </>
           )}
 
@@ -66,13 +138,9 @@ const PurchaseForm = () => {
                 placeholder="Enter phone number"
                 value={phoneNumber}
                 onChange={handlePhoneNumberChange}
-                networkLogo={networkLogo}
+                networkLogo={networkLogo[0]}
               />
-              <InputField
-                label="Amount"
-                type="number"
-                placeholder="Enter amount"
-              />
+              
             </>
           )}
 
