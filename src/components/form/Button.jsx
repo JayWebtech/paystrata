@@ -11,7 +11,7 @@ const Button = ({
 }) => {
   return (
     <button
-      className={`relative rounded-lg cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 active:scale-95
+      className={`relative rounded-lg font-orbitron cursor-pointer transition-all duration-200
         ${
           type === "default"
             ? "text-white bg-primary"

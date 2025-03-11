@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Button from "../form/Button";
 import { Parallax } from "react-scroll-parallax";
+import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -37,7 +38,7 @@ const Hero = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
           >
-            <Button className="w-fit py-5 px-7">Launch app</Button>
+            <Link href="/purchase"><Button className="w-fit py-5 px-7">Launch app</Button></Link>
           </motion.div>
         </motion.div>
         <motion.div
@@ -54,7 +55,7 @@ const Hero = () => {
             loop
             muted
             playsInline
-            className="w-auto h-auto object-cover rounded-lg"
+            className="w-[32em] h-auto object-cover rounded-lg"
           >
             <source src="/video/hero2.webm" type="video/webm" />
             Your browser does not support the video tag.

@@ -38,6 +38,13 @@ body {
   background-size: 100% 100%;
   background-attachment: scroll;
 }
+.page-wrapper2 {
+  background-image: url(../../public/img/wrapper.webp);
+  background-position: 100% 0;
+  background-repeat: no-repeat;
+  background-size: 600% 600%;
+  background-attachment: scroll;
+}
 
 .hero-card {
   background-image: radial-gradient(circle, #864fcb00, #864fcb73);

@@ -46,10 +46,9 @@ const Footer = () => {
             <a
               key={index}
               href={item.link}
-              className="flex items-center gap-2 text-[1em] lg:text-[2em] hover:text-primary transition"
+              className="flex items-center gap-2 text-[1.5em] lg:text-[2em] hover:text-primary transition"
             >
               {item.name}
-              {item.icon}
             </a>
           ))}
         </nav>
