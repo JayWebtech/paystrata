@@ -55,7 +55,7 @@ const JoinUs = () => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                className="text-white text-lg text-center"
+                className="text-white text-sm lg:text-lg text-center"
               >
                 {item.description}
               </motion.p>
