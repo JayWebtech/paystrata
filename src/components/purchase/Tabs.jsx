@@ -1,12 +1,12 @@
-import { Database, PhoneCall, Tv, Lightbulb, FileText } from "lucide-react";
+import { Database, PhoneCall, Tv, Lightbulb, Trophy } from "lucide-react";
 
-const Tabs = ({ activeTab, setActiveTab, setPhoneNumber, setNetworkLogo, setDataPlans, setIsLoading, isLoading }) => {
+const Tabs = ({ activeTab, setActiveTab, setIsLoading, isLoading }) => {
   const tabs = [
-    { name: "Buy data", id: "buy-data", icon: <Database size={26} /> },
-    { name: "Buy airtime", id: "buy-airtime", icon: <PhoneCall size={26} /> },
-    { name: "Pay Cable bills", id: "pay-cable", icon: <Tv size={26} /> },
-    { name: "Pay utility bills", id: "pay-utility", icon: <Lightbulb size={26} /> },
-    { name: "Tax payment", id: "pay-tax", icon: <FileText size={26} /> },
+    { name: "Data", id: "buy-data", icon: <Database className="w-4 h-4 md:w-6 md:h-6" /> },
+    { name: "Airtime", id: "buy-airtime", icon: <PhoneCall className="w-4 h-4 md:w-6 md:h-6" /> },
+    { name: "Cable", id: "pay-cable", icon: <Tv className="w-4 h-4 md:w-6 md:h-6" /> },
+    { name: "Utility", id: "pay-utility", icon: <Lightbulb className="w-4 h-4 md:w-6 md:h-6" /> },
+    { name: "Bet", id: "betting", icon: <Trophy className="w-4 h-4 md:w-6 md:h-6" /> },
   ];
 
   return (
@@ -14,17 +14,17 @@ const Tabs = ({ activeTab, setActiveTab, setPhoneNumber, setNetworkLogo, setData
       {tabs.map((tab) => (
         <button
           key={tab.id}
-          className={`flex items-center gap-5 py-2 px-4 text-sm font-medium cursor-pointer transition-all duration-100 ${
+          className={`flex items-center gap-2 md:gap-5 py-2 px-4 text-[10px] md:text-sm font-medium cursor-pointer transition-all duration-100 ${
             activeTab === tab.id
               ? "border-b-2 border-primary text-primary"
               : "text-white"
           }`}
           onClick={() => {
-            setIsLoading(false)
-            setActiveTab(tab.id)
+            setIsLoading(false);
+            setActiveTab(tab.id);
           }}
         >
-          <span className="flex items-center flex-col gap-2">
+          <span className="flex items-center flex-col gap-1 md:gap-2">
             {tab.icon} {tab.name}
           </span>
         </button>

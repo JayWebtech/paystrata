@@ -8,7 +8,8 @@ export default function InputField({
     required = false,
     networkLogo,
     max,
-    name
+    min,
+    name, 
   }) {
     return (
       <div className="relative mb-4">

@@ -39,21 +39,30 @@ export default function SelectField({
           </option>
           {options.map((option, index) => (
             <option
-              key={index}
-              value={
-                type === "dataplan" ? option.PRODUCT_ID : option.PACKAGE_ID
-              }
-            >
-              {type === "dataplan" ? (
-                <>
-                  {option.PRODUCT_NAME} - ₦{option.PRODUCT_AMOUNT}
-                </>
-              ) : (
-                <>
-                  {option.PACKAGE_NAME}
-                </>
-              )}
-            </option>
+            key={index}
+            value={
+              type === "dataplan"
+                ? option.PRODUCT_ID
+                : type === "electric"
+                ? option.code
+                : option.PACKAGE_ID
+            }
+          >
+            {type === "dataplan" ? (
+              <>
+                {option.PRODUCT_NAME} - ₦{option.PRODUCT_AMOUNT}
+              </>
+            ) : type === "electric" ? (
+              <>
+                {option.name}
+              </>
+            ) : (
+              <>
+                {option.PACKAGE_NAME}
+              </>
+            )}
+          </option>
+          
           ))}
         </select>
       </div>

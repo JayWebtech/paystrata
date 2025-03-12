@@ -10,6 +10,7 @@ import { NetworkProviders } from "@/data/NetworkProviders";
 import { TVProviders } from "@/data/TVProviders";
 import { motion } from "framer-motion";
 import LoadingIndicator from "../loader/LoadingIndicator";
+import { ElectricityProviders } from "@/data/ElectricityCompany";
 
 const PurchaseForm = () => {
   const [activeTab, setActiveTab] = useState("buy-data");
@@ -23,6 +24,11 @@ const PurchaseForm = () => {
   const [selectedTVPlan, setSelectedTVPlan] = useState("");
   const [IUCNumber, setIUCNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [utilityProviders, setUtilityProviders] = useState([]);
+  const [selectedUtility, setSelectedUtility] = useState(null);
+  const [utilityPlans, setUtilityPlans] = useState([]);
+  const [meterNumber, setMeterNumber] = useState("");
+  const [selectedUtilityPlan, setSelectedUtilityPlan] = useState(null);
 
   const detectProvider = (number) => {
     if (number.length >= 4) {
@@ -90,6 +96,25 @@ const PurchaseForm = () => {
     }
   };
 
+  const getUtilityPlans = async (providerCode) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post("/api/get-utility-plans", {
+        providerCode,
+      });
+
+      if (response.data.status) {
+        setUtilityPlans(response.data.data);
+      } else {
+        toast.error("No plans found for this provider");
+        setUtilityPlans([]);
+      }
+    } catch (error) {
+      toast.error(error?.msg || "Failed to fetch electricity plan");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     if (selectedTV) {
       getTVPlans(selectedTV.name);
@@ -99,9 +124,7 @@ const PurchaseForm = () => {
   return (
     <div className="container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 pt-10">
       <div className="max-w-2xl mx-auto">
-        {isLoading && (
-          <LoadingIndicator />
-        )}
+        {isLoading && <LoadingIndicator />}
         <Tabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -168,7 +191,7 @@ const PurchaseForm = () => {
                 {TVProviders.map((provider) => (
                   <button
                     key={provider.code}
-                    className={`p-2 border ring-1 ring-primary rounded-lg flex items-center gap-3 transition-all cursor-pointer duration-200
+                    className={`p-2 ring-1 ring-primary rounded-lg flex items-center gap-3 transition-all cursor-pointer duration-200
             ${selectedTV?.code === provider?.code ? "ring-2 bg-primary" : ""}`}
                     onClick={() =>
                       setSelectedTV({
@@ -186,7 +209,7 @@ const PurchaseForm = () => {
                 ))}
               </div>
 
-              {isLoading && (<span className="text-white">Please wait...</span>)}
+              {isLoading && <span className="text-white">Please wait...</span>}
 
               {tVPlans && !isLoading && (
                 <>
@@ -222,18 +245,65 @@ const PurchaseForm = () => {
 
           {activeTab === "pay-utility" && (
             <>
-              <InputField
-                label="Utility Type"
-                placeholder="Enter utility type"
+              <SelectField
+                label="Electricity Provider"
+                options={ElectricityProviders}
+                onChange={(e) => {
+                  setSelectedUtility(e.target.value);
+                  getUtilityPlans(e.target.value);
+                }}
+                type="electric"
               />
-              <InputField
-                label="Account Number"
-                placeholder="Enter account number"
-              />
+              {selectedUtility && utilityPlans.length > 0 && (
+                <>
+                  <label className="block text-sm font-bold text-white">
+                    Select Plan Type
+                  </label>
+                  <div className="flex gap-4 mb-4">
+                    {utilityPlans.map((plan) => (
+                      <button
+                        key={plan.PRODUCT_ID}
+                        className={`p-2 ring-2 ring-primary text-white rounded-lg transition-all cursor-pointer
+                    ${
+                      selectedUtilityPlan?.PRODUCT_ID === plan.PRODUCT_ID
+                        ? " bg-primary text-white"
+                        : ""
+                    }`}
+                        onClick={() => setSelectedUtilityPlan(plan)}
+                      >
+                        {plan.PRODUCT_TYPE.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {selectedUtilityPlan && !isLoading && (
+                <>
+                  <InputField
+                    label="Meter/Account Number"
+                    placeholder="Enter your meter/account number"
+                    name="meterNumber"
+                    value={meterNumber}
+                    onChange={(e) => setMeterNumber(e.target.value)}
+                  />
+
+                  <InputField
+                    type="number"
+                    label="Amount"
+                    placeholder={`Min: ₦${selectedUtilityPlan.MINIMUN_AMOUNT} - Max: ₦${selectedUtilityPlan.MAXIMUM_AMOUNT}`}
+                    name="amount"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    min={selectedUtilityPlan.MINIMUN_AMOUNT}
+                    max={selectedUtilityPlan.MAXIMUM_AMOUNT}
+                  />
+                </>
+              )}
             </>
           )}
 
-          {activeTab === "pay-tax" && (
+          {activeTab === "betting" && (
             <>
               <InputField
                 label="Utility Type"
