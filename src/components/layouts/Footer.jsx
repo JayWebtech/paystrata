@@ -4,30 +4,30 @@ import { motion } from "framer-motion";
 import { MoveUpRight, Twitter, Linkedin, Facebook } from "lucide-react";
 
 const footerItems = [
-  { name: "Home", icon: <MoveUpRight size={35} />, link: "/" },
-  { name: "About Us", icon: <MoveUpRight size={35} />, link: "/about" },
+  { name: "Home", icon: <MoveUpRight size={26} />, link: "/" },
+  { name: "About Us", icon: <MoveUpRight size={26} />, link: "/about" },
   {
     name: "Terms and Conditions",
-    icon: <MoveUpRight size={35} />,
+    icon: <MoveUpRight size={26} />,
     link: "/terms",
   },
   {
     name: "Join Our Community",
-    icon: <MoveUpRight size={35} />,
+    icon: <MoveUpRight size={26} />,
     link: "/community",
   },
 ];
 
 const socialMedia = [
-  { name: "Twitter", icon: <Twitter size={35} />, link: "https://twitter.com" },
+  { name: "Twitter", icon: <Twitter size={26} />, link: "https://twitter.com" },
   {
     name: "LinkedIn",
-    icon: <Linkedin size={35} />,
+    icon: <Linkedin size={26} />,
     link: "https://linkedin.com",
   },
   {
     name: "Facebook",
-    icon: <Facebook size={35} />,
+    icon: <Facebook size={26} />,
     link: "https://facebook.com",
   },
 ];
