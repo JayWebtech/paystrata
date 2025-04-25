@@ -1,6 +1,15 @@
 import React from "react";
 
-const Button = ({
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
+  onClick?: () => void;
+  size?: "sm" | "lg";
+  type?: "default" | "outline";
+  className?: string;
+  children: React.ReactNode;
+  disabled?: boolean;
+}
+
+const Button: React.FC<ButtonProps> = ({
   onClick,
   size = "sm",
   type = "default",

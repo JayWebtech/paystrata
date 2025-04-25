@@ -1,22 +1,28 @@
-export const TVProviders = [
+interface TVProvider {
+    name: string;
+    code: string;
+    img: string;
+}
+
+export const TVProviders: TVProvider[] = [
     {
         name: "DStv",
-        code : "dstv",
+        code: "dstv",
         img: "/logos/dstv.png"
     },
     {
         name: "GOtv",
-        code : "gotv",
+        code: "gotv",
         img: "/logos/gotv.png"
     },
     {
         name: "Startimes",
-        code : "startimes",
+        code: "startimes",
         img: "/logos/startimes.webp"
     },
     {
         name: "Showmax",
-        code : "showmax",
+        code: "showmax",
         img: "/logos/showmax.png"
     }
 ]

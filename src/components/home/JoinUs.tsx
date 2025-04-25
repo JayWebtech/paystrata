@@ -4,7 +4,14 @@ import {
   motion,
 } from "framer-motion";
 
-const cards = [
+interface Card {
+  id: number;
+  title: string;
+  description: string;
+  button: string;
+}
+
+const cards: Card[] = [
   {
     id: 1,
     title: "Instant Airtime & Data Purchases ⚡",
@@ -28,8 +35,7 @@ const cards = [
   },
 ];
 
-const JoinUs = () => {
-
+const JoinUs: React.FC = () => {
   return (
     <div
       className={`pt-[2em] lg:pt-[4em] container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-3`}

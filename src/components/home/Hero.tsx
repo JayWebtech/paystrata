@@ -5,7 +5,7 @@ import Button from "../form/Button";
 import { Parallax } from "react-scroll-parallax";
 import Link from "next/link";
 
-const Hero = () => {
+const Hero: React.FC = () => {
   return (
     <div className="container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 pt-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-auto items-start">
@@ -38,7 +38,7 @@ const Hero = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
           >
-            <Link href="/purchase"><Button className="w-fit py-5 px-7">Launch app</Button></Link>
+            <Link href="/pay-bill"><Button className="w-fit py-5 px-7">Launch app</Button></Link>
           </motion.div>
         </motion.div>
         <motion.div

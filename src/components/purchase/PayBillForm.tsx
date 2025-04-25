@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import InputField from "../form/InputField";
 import Tabs from "./Tabs";
 import Button from "../form/Button";
@@ -8,78 +8,91 @@ import toast from "react-hot-toast";
 import SelectField from "../form/SelectField";
 import { NetworkProviders } from "@/data/NetworkProviders";
 import { TVProviders } from "@/data/TVProviders";
-import { motion } from "framer-motion";
 import LoadingIndicator from "../loader/LoadingIndicator";
 import { ElectricityProviders } from "@/data/ElectricityCompany";
-import { BetterProviders } from "@/data/BettingProviders";
+import { DataPlan, TVPlan, UtilityPlan, TVProvider } from "@/types/api";
+import { useAccount } from "@starknet-react/core";
 
-const PurchaseForm = () => {
-  const [activeTab, setActiveTab] = useState("buy-data");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [amount, setAmount] = useState("");
-  const [networkLogo, setNetworkLogo] = useState(null);
-  const [dataPlans, setDataPlans] = useState(null);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [selectedTV, setSelectedTV] = useState(null);
-  const [tVPlans, setTVPlans] = useState(null);
-  const [selectedTVPlan, setSelectedTVPlan] = useState("");
-  const [IUCNumber, setIUCNumber] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [utilityProviders, setUtilityProviders] = useState([]);
-  const [selectedUtility, setSelectedUtility] = useState(null);
-  const [utilityPlans, setUtilityPlans] = useState([]);
-  const [meterNumber, setMeterNumber] = useState("");
-  const [selectedUtilityPlan, setSelectedUtilityPlan] = useState(null);
+interface FormState {
+  phoneNumber: string;
+  amount: string;
+  IUCNumber: string;
+  meterNumber: string;
+}
 
-  const detectProvider = (number) => {
-    if (number.length >= 4) {
-      const prefix = number.slice(0, 4);
-      const provider = NetworkProviders.find((p) =>
-        p.prefixes.includes(prefix)
-      );
+const PayBillForm: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>("buy-data");
+  const [formState, setFormState] = useState<FormState>({
+    phoneNumber: "",
+    amount: "",
+    IUCNumber: "",
+    meterNumber: "",
+  });
+  const [networkLogo, setNetworkLogo] = useState<string | null>(null);
+  const [dataPlans, setDataPlans] = useState<DataPlan[] | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedTV, setSelectedTV] = useState<TVProvider | null>(null);
+  const [tVPlans, setTVPlans] = useState<TVPlan[] | null>(null);
+  const [selectedTVPlan, setSelectedTVPlan] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedUtility, setSelectedUtility] = useState<string | null>(null);
+  const [utilityPlans, setUtilityPlans] = useState<UtilityPlan[]>([]);
+  const [selectedUtilityPlan, setSelectedUtilityPlan] =
+    useState<UtilityPlan | null>(null);
+  const { address } = useAccount();
 
-      if (provider) {
-        setNetworkLogo(provider.logo);
-        if (!dataPlans && activeTab === "buy-data") {
-          getDataPlans(provider.name);
+  const detectProvider = useCallback(
+    (number: string) => {
+      if (number.length >= 4) {
+        const prefix = number.slice(0, 4);
+        const provider = NetworkProviders.find((p) =>
+          p.prefixes.includes(prefix)
+        );
+
+        if (provider) {
+          setNetworkLogo(provider.logo);
+          if (!dataPlans && activeTab === "buy-data") {
+            getDataPlans(provider.name);
+          }
+        } else {
+          toast.error("You entered an invalid number");
+          setNetworkLogo(null);
         }
       } else {
-        toast.error("You entered an invalid number");
+        setDataPlans(null);
         setNetworkLogo(null);
       }
-    } else {
-      setDataPlans(null);
-      setNetworkLogo(null);
-    }
-  };
+    },
+    [activeTab, dataPlans]
+  );
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "phoneNumber") {
-      setPhoneNumber(value);
-      detectProvider(value);
-    } else if (name === "amount") {
-      setAmount(value);
-    } else if (name === "IUCNumber") {
-      setIUCNumber(value);
-    }
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setFormState((prev) => ({ ...prev, [name]: value }));
 
-  const getDataPlans = async (network) => {
+      if (name === "phoneNumber") {
+        detectProvider(value);
+      }
+    },
+    [detectProvider]
+  );
+
+  const getDataPlans = useCallback(async (network: string) => {
     setIsLoading(true);
     try {
       const response = await axios.post("/api/get-data-plans", { network });
       if (response.data.status) {
         setDataPlans(response?.data?.data[0]?.PRODUCT);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error?.message || "Failed to fetch data plans");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const getTVPlans = async (providerCode) => {
+  const getTVPlans = useCallback(async (providerCode: string) => {
     setIsLoading(true);
     try {
       const response = await axios.post("/api/get-cable-plans", {
@@ -88,16 +101,16 @@ const PurchaseForm = () => {
       if (response.data.status) {
         setTVPlans(response.data.data);
       } else {
-        toast.error(response?.msg);
+        toast.error(response?.data?.msg || "Failed to fetch TV plans");
       }
-    } catch (error) {
-      toast.error(error?.message || "Failed to fetch data plans");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to fetch TV plans");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const getUtilityPlans = async (providerCode) => {
+  const getUtilityPlans = useCallback(async (providerCode: string) => {
     setIsLoading(true);
     try {
       const response = await axios.post("/api/get-utility-plans", {
@@ -111,17 +124,36 @@ const PurchaseForm = () => {
         toast.error("No plans found for this provider");
         setUtilityPlans([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error?.msg || "Failed to fetch electricity plan");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  const handlePayment = useCallback(async () => {
+    if (!address) {
+      toast.error("Please connect your wallet to proceed");
+      return;
+    }
+    if (!formState.phoneNumber) {
+      toast.error("Phone number is required");
+      return;
+    }
+
+    if(activeTab === "buy-data") {
+      
+    }
+
+
+
+  }, [formState, address]);
+
   useEffect(() => {
     if (selectedTV) {
       getTVPlans(selectedTV.name);
     }
-  }, [selectedTV]);
+  }, [selectedTV, getTVPlans]);
 
   return (
     <div className="container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 pt-10">
@@ -130,7 +162,9 @@ const PurchaseForm = () => {
         <Tabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          setPhoneNumber={setPhoneNumber}
+          setPhoneNumber={(number: string) =>
+            setFormState((prev) => ({ ...prev, phoneNumber: number }))
+          }
           setNetworkLogo={setNetworkLogo}
           setDataPlans={setDataPlans}
           setIsLoading={setIsLoading}
@@ -141,9 +175,10 @@ const PurchaseForm = () => {
           {activeTab === "buy-data" && (
             <>
               <InputField
+                id="phoneNumber"
                 label="Phone Number"
                 placeholder="Enter phone number"
-                value={phoneNumber}
+                value={formState.phoneNumber}
                 name="phoneNumber"
                 onChange={handleInputChange}
                 networkLogo={networkLogo}
@@ -152,6 +187,8 @@ const PurchaseForm = () => {
               />
               {dataPlans && (
                 <SelectField
+                  id="dataPlan"
+                  value={selectedPlan || ""}
                   onChange={(e) => setSelectedPlan(e.target.value)}
                   label="Select data plans"
                   options={dataPlans}
@@ -164,21 +201,23 @@ const PurchaseForm = () => {
           {activeTab === "buy-airtime" && (
             <>
               <InputField
+                id="phoneNumber"
                 label="Phone Number"
                 placeholder="Enter phone number"
                 name="phoneNumber"
-                value={phoneNumber}
+                value={formState.phoneNumber}
                 onChange={handleInputChange}
                 networkLogo={networkLogo}
                 max={11}
               />
 
               <InputField
+                id="amount"
                 type="number"
                 name="amount"
                 label="Airtime Amount"
                 placeholder="Enter amount"
-                value={amount}
+                value={formState.amount}
                 onChange={handleInputChange}
               />
             </>
@@ -194,11 +233,16 @@ const PurchaseForm = () => {
                   <button
                     key={provider.code}
                     className={`p-2 ring-1 ring-primary rounded-lg flex items-center gap-3 transition-all cursor-pointer duration-200
-                    ${selectedTV?.code === provider?.code ? "ring-2 bg-primary" : ""}`}
+                    ${
+                      selectedTV?.code === provider?.code
+                        ? "ring-2 bg-primary"
+                        : ""
+                    }`}
                     onClick={() =>
                       setSelectedTV({
                         name: provider.name,
                         code: provider.code,
+                        img: provider.img,
                       })
                     }
                   >
@@ -216,6 +260,8 @@ const PurchaseForm = () => {
               {tVPlans && !isLoading && (
                 <>
                   <SelectField
+                    id="tvPlan"
+                    value={selectedTVPlan}
                     onChange={(e) => setSelectedTVPlan(e.target.value)}
                     label="Select TV plans"
                     options={tVPlans}
@@ -223,17 +269,19 @@ const PurchaseForm = () => {
                     type="TV"
                   />
                   <InputField
+                    id="iucNumber"
                     label="SC/IUC Number"
                     placeholder="Enter SC/IUC Number"
                     name="IUCNumber"
-                    value={IUCNumber}
+                    value={formState.IUCNumber}
                     type="number"
                     onChange={handleInputChange}
                   />
                   <InputField
+                    id="phoneNumber"
                     label="Phone Number"
                     placeholder="Enter phone number"
-                    value={phoneNumber}
+                    value={formState.phoneNumber}
                     name="phoneNumber"
                     onChange={handleInputChange}
                     networkLogo={networkLogo}
@@ -248,6 +296,8 @@ const PurchaseForm = () => {
           {activeTab === "pay-utility" && (
             <>
               <SelectField
+                id="utilityProvider"
+                value={selectedUtility || ""}
                 label="Electricity Provider"
                 options={ElectricityProviders}
                 onChange={(e) => {
@@ -283,20 +333,32 @@ const PurchaseForm = () => {
               {selectedUtilityPlan && !isLoading && (
                 <>
                   <InputField
+                    id="meterNumber"
                     label="Meter/Account Number"
                     placeholder="Enter your meter/account number"
                     name="meterNumber"
-                    value={meterNumber}
-                    onChange={(e) => setMeterNumber(e.target.value)}
+                    value={formState.meterNumber}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        meterNumber: e.target.value,
+                      }))
+                    }
                   />
 
                   <InputField
+                    id="amount"
                     type="number"
                     label="Amount"
                     placeholder={`Min: ₦${selectedUtilityPlan.MINIMUN_AMOUNT} - Max: ₦${selectedUtilityPlan.MAXIMUM_AMOUNT}`}
                     name="amount"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    value={formState.amount}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        amount: e.target.value,
+                      }))
+                    }
                     min={selectedUtilityPlan.MINIMUN_AMOUNT}
                     max={selectedUtilityPlan.MAXIMUM_AMOUNT}
                   />
@@ -304,37 +366,14 @@ const PurchaseForm = () => {
               )}
             </>
           )}
-
-          {activeTab === "betting" && (
-            <>
-               <SelectField
-                label="Betting Provider"
-                options={BetterProviders}
-                onChange={(e) => {
-                  
-                }}
-                type="betting"
-              />
-              <InputField
-                label="Betting"
-                placeholder="Enter betting account"
-              />
-              <InputField
-                type="number"
-                name="amount"
-                label="Airtime Amount"
-                placeholder="Enter amount"
-                value={amount}
-                onChange={handleInputChange}
-              />
-            </>
-          )}
         </div>
 
-        <Button className="mt-5 py-5 w-full">Pay now</Button>
+        <Button className="mt-5 py-5 w-full" onClick={handlePayment}>
+          Pay now
+        </Button>
       </div>
     </div>
   );
 };
 
-export default PurchaseForm;
+export default PayBillForm;

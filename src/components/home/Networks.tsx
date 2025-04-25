@@ -3,7 +3,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import Button from "../form/Button";
 
-const providers = [
+interface Provider {
+  name: string;
+  logo: string;
+}
+
+const providers: Provider[] = [
   { name: "MTN", logo: "/logos/mtn.jpg" },
   { name: "Glo", logo: "/logos/glo.svg" },
   { name: "Airtel", logo: "/logos/airtel.jpg" },
@@ -15,7 +20,7 @@ const textVariants = {
   visible: { opacity: 1, x: 0, transition: { duration: 1, ease: "easeOut" } },
 };
 
-const Networks = () => {
+const Networks: React.FC = () => {
   return (
     <motion.section
       initial="hidden"
@@ -44,8 +49,6 @@ const Networks = () => {
             <Button>Learn More →</Button>
           </motion.div>
         </motion.div>
-
-       
       </motion.div>
     </motion.section>
   );

@@ -1,6 +1,14 @@
 import axios from "axios";
+import { NextRequest } from "next/server";
 
-export async function POST(req, res) {
+interface CableResponse {
+  status: boolean;
+  data?: any;
+  msg?: string;
+  message?: string;
+}
+
+export async function POST(req: NextRequest): Promise<Response> {
   const { providerCode } = await req.json();
   try {
     const response = await axios.get(
@@ -29,7 +37,7 @@ export async function POST(req, res) {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: any) {
     return new Response(
       JSON.stringify({
         status: false,

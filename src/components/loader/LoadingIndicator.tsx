@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
+import React from "react";
 
-const LoadingIndicator = () => {
+const LoadingIndicator: React.FC = () => {
   return (
     <div className="max-w-2xl h-2 bg-primary3 rounded-t-lg overflow-hidden">
       <motion.div

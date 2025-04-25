@@ -1,4 +1,10 @@
-export const NetworkProviders = [
+interface NetworkProvider {
+  name: string;
+  logo: string;
+  prefixes: string[];
+}
+
+export const NetworkProviders: NetworkProvider[] = [
   {
     name: "MTN",
     logo: "/logos/mtn.jpg",

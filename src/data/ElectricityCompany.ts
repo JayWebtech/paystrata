@@ -1,4 +1,10 @@
-export const ElectricityProviders = [
+interface ElectricityProvider {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export const ElectricityProviders: ElectricityProvider[] = [
     { id: "00", name: "Select provider", code: "-" },
     { id: "01", name: "Eko Electric - EKEDC (PHCN)", code: "EKO_ELECTRIC" },
     { id: "02", name: "Ikeja Electric - IKEDC (PHCN)", code: "IKEJA_ELECTRIC" },

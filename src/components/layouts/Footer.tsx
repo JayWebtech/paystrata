@@ -1,9 +1,21 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { MoveUpRight, Twitter, Linkedin, Facebook } from "lucide-react";
+import { MoveUpRight, Twitter } from "lucide-react";
 
-const footerItems = [
+interface FooterItem {
+  name: string;
+  icon: React.ReactNode;
+  link: string;
+}
+
+interface SocialMedia {
+  name: string;
+  icon: React.ReactNode;
+  link: string;
+}
+
+const footerItems: FooterItem[] = [
   { name: "Home", icon: <MoveUpRight size={26} />, link: "/" },
   { name: "About Us", icon: <MoveUpRight size={26} />, link: "/about" },
   {
@@ -18,21 +30,11 @@ const footerItems = [
   },
 ];
 
-const socialMedia = [
-  { name: "Twitter", icon: <Twitter size={26} />, link: "https://twitter.com" },
-  {
-    name: "LinkedIn",
-    icon: <Linkedin size={26} />,
-    link: "https://linkedin.com",
-  },
-  {
-    name: "Facebook",
-    icon: <Facebook size={26} />,
-    link: "https://facebook.com",
-  },
+const socialMedia: SocialMedia[] = [
+  { name: "Twitter", icon: <Twitter size={40} />, link: "https://twitter.com" },
 ];
 
-const Footer = () => {
+const Footer: React.FC = () => {
   return (
     <motion.section
       initial="hidden"
@@ -53,7 +55,8 @@ const Footer = () => {
           ))}
         </nav>
 
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4 mt-4 items-center">
+          <span className="text-white text-xl">Follow us on X</span>
           {socialMedia.map((social, index) => (
             <a
               key={index}

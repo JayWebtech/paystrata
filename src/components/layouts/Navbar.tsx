@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import ConnectWalletButton from "../form/ConnectWalletButton";
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Navbar: React.FC = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <div className="container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 pt-6">
       <motion.div

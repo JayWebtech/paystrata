@@ -3,19 +3,26 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Lock, TrendingUp, Eye, Link2 } from "lucide-react";
 
-const features = [
+interface Feature {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  video: string;
+}
+
+const features: Feature[] = [
   {
     title: "Low Fees",
     description: "No extra charges – you only pay for what you buy.",
     icon: <Link2 size={32} color="#fff" />,
-    video: "/video/why-2.webm",
+    video: "/img/cone.png",
   },
   {
     title: "Instant Transactions",
     description:
       "Buy airtime or data in seconds with lightning-fast blockchain payments.",
     icon: <TrendingUp size={32} color="#fff" />,
-    video: "/video/hero3.webm",
+    video: "/img/cone-2.png",
   },
 ];
 
@@ -33,7 +40,7 @@ const cardVariants = {
   },
 };
 
-const WhyChooseUs = () => {
+const WhyChooseUs: React.FC = () => {
   return (
     <motion.section
       initial="hidden"
@@ -50,12 +57,9 @@ const WhyChooseUs = () => {
             className="relative rounded-xl overflow-hidden shadow-lg h-[20em] hero-card"
           >
             {feature.video && (
-              <motion.video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute top-0 left-0 w-full h-full object-cover"
+              <motion.div
+                className="absolute top-0 left-0 w-full h-full bg-cover bg-center"
+                style={{ backgroundImage: `url(${feature.video})` }}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
                 transition={{
@@ -64,9 +68,7 @@ const WhyChooseUs = () => {
                   repeat: Infinity,
                   repeatType: "reverse",
                 }}
-              >
-                <source src={feature.video} type="video/webm" />
-              </motion.video>
+              />
             )}
             <motion.div
               className="absolute bottom-0 left-0 w-full bg-black/40 backdrop-blur-md p-6 rounded-b-xl flex flex-col gap-3"
