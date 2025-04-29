@@ -1,8 +1,6 @@
-"use client";
-import React from "react";
-import {
-  motion,
-} from "framer-motion";
+'use client';
+import React from 'react';
+import { motion } from 'framer-motion';
 
 interface Card {
   id: number;
@@ -14,24 +12,24 @@ interface Card {
 const cards: Card[] = [
   {
     id: 1,
-    title: "Instant Airtime & Data Purchases ⚡",
+    title: 'Instant Airtime & Data Purchases ⚡',
     description:
-      "Buy airtime and mobile data instantly with decentralized transactions on StarkNet. Fast, low-cost, and secure—no middlemen, no delays!",
-    button: "Buy Now",
+      'Buy airtime and mobile data instantly with decentralized transactions on StarkNet. Fast, low-cost, and secure—no middlemen, no delays!',
+    button: 'Buy Now',
   },
   {
     id: 2,
-    title: "Powered by StarkNet 🚀",
+    title: 'Powered by StarkNet 🚀',
     description:
       "Experience the future of payments with StarkNet's lightning-fast transactions. Decentralized, scalable, and built for efficiency.",
-    button: "Learn More",
+    button: 'Learn More',
   },
   {
     id: 3,
-    title: "Seamless & Secure Payments 🔐",
+    title: 'Seamless & Secure Payments 🔐',
     description:
-      "Enjoy hassle-free payments with blockchain security. Say goodbye to traditional banking delays and enjoy smooth, real-time transactions.",
-    button: "Get Started",
+      'Enjoy hassle-free payments with blockchain security. Say goodbye to traditional banking delays and enjoy smooth, real-time transactions.',
+    button: 'Get Started',
   },
 ];
 
@@ -43,8 +41,8 @@ const JoinUs: React.FC = () => {
       {cards.map((item, index) => {
         return (
           <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
             key={index}
             className={`hero-card  border-[1px] w-full border-stroke backdrop-blur-lg flex flex-col justify-center items-center gap-5 p-5 lg:p-[2em] mx-auto sticky ${index == 0 ? 'rounded-t-lg lg:rounded-l-lg lg:rounded-t-none' : index == 2 ? 'rounded-b-lg lg:rounded-r-lg lg:rounded-bl-none' : ''}`}
           >
@@ -52,7 +50,7 @@ const JoinUs: React.FC = () => {
               <motion.h4
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
                 className="font-orbitron text-white text-[1.5em] md:text-[2.2rem] font-bold text-center"
               >
                 {item.title}
@@ -60,7 +58,7 @@ const JoinUs: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
                 className="text-white text-sm lg:text-lg text-center"
               >
                 {item.description}

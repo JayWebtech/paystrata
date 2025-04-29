@@ -1,8 +1,8 @@
-"use client";
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import ConnectWalletButton from "../form/ConnectWalletButton";
+'use client';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import ConnectWalletButton from '../form/ConnectWalletButton';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <Link href={"/"}>
+          <Link href={'/'}>
             <h1 className="text-2xl font-bold text-white">
               $tark<span className="text-primary">Pay</span>
             </h1>

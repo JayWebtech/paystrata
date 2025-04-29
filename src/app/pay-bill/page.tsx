@@ -1,6 +1,6 @@
-import React from "react";
-import Navbar from "@/components/layouts/Navbar";
-import PayBillForm from "@/components/purchase/PayBillForm";
+import React from 'react';
+import Navbar from '@/components/layouts/Navbar';
+import PayBillForm from '@/components/purchase/PayBillForm';
 
 const Page: React.FC = () => {
   return (

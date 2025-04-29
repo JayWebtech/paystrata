@@ -1,7 +1,7 @@
-"use client";
-import React from "react";
-import { motion } from "framer-motion";
-import { Lock, TrendingUp, Eye, Link2 } from "lucide-react";
+'use client';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Lock, TrendingUp, Eye, Link2 } from 'lucide-react';
 
 interface Feature {
   title: string;
@@ -12,17 +12,16 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    title: "Low Fees",
-    description: "No extra charges – you only pay for what you buy.",
+    title: 'Low Fees',
+    description: 'No extra charges – you only pay for what you buy.',
     icon: <Link2 size={32} color="#fff" />,
-    video: "/img/cone.png",
+    video: '/img/cone.png',
   },
   {
-    title: "Instant Transactions",
-    description:
-      "Buy airtime or data in seconds with lightning-fast blockchain payments.",
+    title: 'Instant Transactions',
+    description: 'Buy airtime or data in seconds with lightning-fast blockchain payments.',
     icon: <TrendingUp size={32} color="#fff" />,
-    video: "/img/cone-2.png",
+    video: '/img/cone-2.png',
   },
 ];
 
@@ -32,11 +31,11 @@ const cardVariants = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.8, ease: "easeOut" },
+    transition: { duration: 0.8, ease: 'easeOut' },
   },
   hover: {
     scale: 1.05,
-    transition: { duration: 0.3, ease: "easeInOut" },
+    transition: { duration: 0.3, ease: 'easeInOut' },
   },
 };
 
@@ -64,9 +63,9 @@ const WhyChooseUs: React.FC = () => {
                 animate={{ scale: 1 }}
                 transition={{
                   duration: 2,
-                  ease: "easeInOut",
+                  ease: 'easeInOut',
                   repeat: Infinity,
-                  repeatType: "reverse",
+                  repeatType: 'reverse',
                 }}
               />
             )}
@@ -74,7 +73,7 @@ const WhyChooseUs: React.FC = () => {
               className="absolute bottom-0 left-0 w-full bg-black/40 backdrop-blur-md p-6 rounded-b-xl flex flex-col gap-3"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 1, ease: "easeOut", delay: index * 0.2 }}
+              transition={{ duration: 1, ease: 'easeOut', delay: index * 0.2 }}
             >
               <h3 className="text-white text-lg font-semibold flex items-center gap-2">
                 {feature.icon} {feature.title}

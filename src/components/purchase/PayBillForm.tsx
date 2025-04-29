@@ -1,17 +1,17 @@
-"use client";
-import React, { useEffect, useState, useCallback } from "react";
-import InputField from "../form/InputField";
-import Tabs from "./Tabs";
-import Button from "../form/Button";
-import axios from "axios";
-import toast from "react-hot-toast";
-import SelectField from "../form/SelectField";
-import { NetworkProviders } from "@/data/NetworkProviders";
-import { TVProviders } from "@/data/TVProviders";
-import LoadingIndicator from "../loader/LoadingIndicator";
-import { ElectricityProviders } from "@/data/ElectricityCompany";
-import { DataPlan, TVPlan, UtilityPlan, TVProvider } from "@/types/api";
-import { useAccount } from "@starknet-react/core";
+'use client';
+import React, { useEffect, useState, useCallback } from 'react';
+import InputField from '../form/InputField';
+import Tabs from './Tabs';
+import Button from '../form/Button';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import SelectField from '../form/SelectField';
+import { NetworkProviders } from '@/data/NetworkProviders';
+import { TVProviders } from '@/data/TVProviders';
+import LoadingIndicator from '../loader/LoadingIndicator';
+import { ElectricityProviders } from '@/data/ElectricityCompany';
+import { DataPlan, TVPlan, UtilityPlan, TVProvider } from '@/types/api';
+import { useAccount } from '@starknet-react/core';
 
 interface FormState {
   phoneNumber: string;
@@ -21,41 +21,38 @@ interface FormState {
 }
 
 const PayBillForm: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("buy-data");
+  const [activeTab, setActiveTab] = useState<string>('buy-data');
   const [formState, setFormState] = useState<FormState>({
-    phoneNumber: "",
-    amount: "",
-    IUCNumber: "",
-    meterNumber: "",
+    phoneNumber: '',
+    amount: '',
+    IUCNumber: '',
+    meterNumber: '',
   });
   const [networkLogo, setNetworkLogo] = useState<string | null>(null);
   const [dataPlans, setDataPlans] = useState<DataPlan[] | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedTV, setSelectedTV] = useState<TVProvider | null>(null);
   const [tVPlans, setTVPlans] = useState<TVPlan[] | null>(null);
-  const [selectedTVPlan, setSelectedTVPlan] = useState<string>("");
+  const [selectedTVPlan, setSelectedTVPlan] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedUtility, setSelectedUtility] = useState<string | null>(null);
   const [utilityPlans, setUtilityPlans] = useState<UtilityPlan[]>([]);
-  const [selectedUtilityPlan, setSelectedUtilityPlan] =
-    useState<UtilityPlan | null>(null);
+  const [selectedUtilityPlan, setSelectedUtilityPlan] = useState<UtilityPlan | null>(null);
   const { address } = useAccount();
 
   const detectProvider = useCallback(
     (number: string) => {
       if (number.length >= 4) {
         const prefix = number.slice(0, 4);
-        const provider = NetworkProviders.find((p) =>
-          p.prefixes.includes(prefix)
-        );
+        const provider = NetworkProviders.find((p) => p.prefixes.includes(prefix));
 
         if (provider) {
           setNetworkLogo(provider.logo);
-          if (!dataPlans && activeTab === "buy-data") {
+          if (!dataPlans && activeTab === 'buy-data') {
             getDataPlans(provider.name);
           }
         } else {
-          toast.error("You entered an invalid number");
+          toast.error('You entered an invalid number');
           setNetworkLogo(null);
         }
       } else {
@@ -71,7 +68,7 @@ const PayBillForm: React.FC = () => {
       const { name, value } = e.target;
       setFormState((prev) => ({ ...prev, [name]: value }));
 
-      if (name === "phoneNumber") {
+      if (name === 'phoneNumber') {
         detectProvider(value);
       }
     },
@@ -81,12 +78,12 @@ const PayBillForm: React.FC = () => {
   const getDataPlans = useCallback(async (network: string) => {
     setIsLoading(true);
     try {
-      const response = await axios.post("/api/get-data-plans", { network });
+      const response = await axios.post('/api/get-data-plans', { network });
       if (response.data.status) {
         setDataPlans(response?.data?.data[0]?.PRODUCT);
       }
     } catch (error: any) {
-      toast.error(error?.message || "Failed to fetch data plans");
+      toast.error(error?.message || 'Failed to fetch data plans');
     } finally {
       setIsLoading(false);
     }
@@ -95,16 +92,16 @@ const PayBillForm: React.FC = () => {
   const getTVPlans = useCallback(async (providerCode: string) => {
     setIsLoading(true);
     try {
-      const response = await axios.post("/api/get-cable-plans", {
+      const response = await axios.post('/api/get-cable-plans', {
         providerCode,
       });
       if (response.data.status) {
         setTVPlans(response.data.data);
       } else {
-        toast.error(response?.data?.msg || "Failed to fetch TV plans");
+        toast.error(response?.data?.msg || 'Failed to fetch TV plans');
       }
     } catch (error: any) {
-      toast.error(error?.message || "Failed to fetch TV plans");
+      toast.error(error?.message || 'Failed to fetch TV plans');
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +110,7 @@ const PayBillForm: React.FC = () => {
   const getUtilityPlans = useCallback(async (providerCode: string) => {
     setIsLoading(true);
     try {
-      const response = await axios.post("/api/get-utility-plans", {
+      const response = await axios.post('/api/get-utility-plans', {
         providerCode,
       });
 
@@ -121,11 +118,11 @@ const PayBillForm: React.FC = () => {
         setUtilityPlans(response.data.data);
         setSelectedUtilityPlan(null);
       } else {
-        toast.error("No plans found for this provider");
+        toast.error('No plans found for this provider');
         setUtilityPlans([]);
       }
     } catch (error: any) {
-      toast.error(error?.msg || "Failed to fetch electricity plan");
+      toast.error(error?.msg || 'Failed to fetch electricity plan');
     } finally {
       setIsLoading(false);
     }
@@ -133,25 +130,21 @@ const PayBillForm: React.FC = () => {
 
   const handlePayment = useCallback(async () => {
     if (!address) {
-      toast.error("Please connect your wallet to proceed");
+      toast.error('Please connect your wallet to proceed');
       return;
     }
     if (!formState.phoneNumber) {
-      toast.error("Phone number is required");
+      toast.error('Phone number is required');
       return;
     }
 
     if (formState.phoneNumber.length < 11) {
-      toast.error("Phone number must be 11 digits");
+      toast.error('Phone number must be 11 digits');
       return;
     }
 
-    if(activeTab === "buy-data") {
-
+    if (activeTab === 'buy-data') {
     }
-
-
-
   }, [formState, address]);
 
   useEffect(() => {
@@ -177,7 +170,7 @@ const PayBillForm: React.FC = () => {
         />
 
         <div className="hero-card border-[1px] border-stroke rounded-lg flex flex-col gap-3 p-8 backdrop-blur-xl mt-5">
-          {activeTab === "buy-data" && (
+          {activeTab === 'buy-data' && (
             <>
               <InputField
                 id="phoneNumber"
@@ -193,7 +186,7 @@ const PayBillForm: React.FC = () => {
               {dataPlans && (
                 <SelectField
                   id="dataPlan"
-                  value={selectedPlan || ""}
+                  value={selectedPlan || ''}
                   onChange={(e) => setSelectedPlan(e.target.value)}
                   label="Select data plans"
                   options={dataPlans}
@@ -203,7 +196,7 @@ const PayBillForm: React.FC = () => {
             </>
           )}
 
-          {activeTab === "buy-airtime" && (
+          {activeTab === 'buy-airtime' && (
             <>
               <InputField
                 id="phoneNumber"
@@ -228,21 +221,15 @@ const PayBillForm: React.FC = () => {
             </>
           )}
 
-          {activeTab === "pay-cable" && (
+          {activeTab === 'pay-cable' && (
             <>
-              <label className="block text-sm font-bold text-white">
-                Select Cable Provider
-              </label>
+              <label className="block text-sm font-bold text-white">Select Cable Provider</label>
               <div className="flex gap-4 mb-4">
                 {TVProviders.map((provider) => (
                   <button
                     key={provider.code}
                     className={`p-2 ring-1 ring-primary rounded-lg flex items-center gap-3 transition-all cursor-pointer duration-200
-                    ${
-                      selectedTV?.code === provider?.code
-                        ? "ring-2 bg-primary"
-                        : ""
-                    }`}
+                    ${selectedTV?.code === provider?.code ? 'ring-2 bg-primary' : ''}`}
                     onClick={() =>
                       setSelectedTV({
                         name: provider.name,
@@ -298,11 +285,11 @@ const PayBillForm: React.FC = () => {
             </>
           )}
 
-          {activeTab === "pay-utility" && (
+          {activeTab === 'pay-utility' && (
             <>
               <SelectField
                 id="utilityProvider"
-                value={selectedUtility || ""}
+                value={selectedUtility || ''}
                 label="Electricity Provider"
                 options={ElectricityProviders}
                 onChange={(e) => {
@@ -313,9 +300,7 @@ const PayBillForm: React.FC = () => {
               />
               {selectedUtility && utilityPlans.length > 0 && (
                 <>
-                  <label className="block text-sm font-bold text-white">
-                    Select Plan Type
-                  </label>
+                  <label className="block text-sm font-bold text-white">Select Plan Type</label>
                   <div className="flex gap-4 mb-4">
                     {utilityPlans.map((plan) => (
                       <button
@@ -323,8 +308,8 @@ const PayBillForm: React.FC = () => {
                         className={`p-2 ring-2 ring-primary text-white rounded-lg transition-all cursor-pointer
                     ${
                       selectedUtilityPlan?.PRODUCT_ID === plan.PRODUCT_ID
-                        ? " bg-primary text-white"
-                        : ""
+                        ? ' bg-primary text-white'
+                        : ''
                     }`}
                         onClick={() => setSelectedUtilityPlan(plan)}
                       >

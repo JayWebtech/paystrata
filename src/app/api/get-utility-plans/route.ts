@@ -1,5 +1,5 @@
-import axios from "axios";
-import { NextRequest } from "next/server";
+import axios from 'axios';
+import { NextRequest } from 'next/server';
 
 interface UtilityResponse {
   status: boolean;
@@ -23,10 +23,10 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     if (!allProviders) {
       return new Response(
-        JSON.stringify({ status: false, msg: "No electricity providers found" }),
+        JSON.stringify({ status: false, msg: 'No electricity providers found' }),
         {
           status: 404,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
@@ -34,31 +34,25 @@ export async function POST(req: NextRequest): Promise<Response> {
     const selectedProvider = allProviders[providerCode]?.[0];
 
     if (!selectedProvider) {
-      return new Response(
-        JSON.stringify({ status: false, msg: "Provider not found" }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ status: false, msg: 'Provider not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    return new Response(
-      JSON.stringify({ status: true, data: selectedProvider.PRODUCT }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ status: true, data: selectedProvider.PRODUCT }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error: any) {
     return new Response(
       JSON.stringify({
         status: false,
-        message: error.message || "Error fetching electricity plans",
+        message: error.message || 'Error fetching electricity plans',
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }

@@ -10,7 +10,7 @@ const axiosInstance: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
   timeout: 60000,
 });
@@ -33,18 +33,18 @@ axiosInstance.interceptors.response.use(
   (error: AxiosError<ErrorResponse>) => {
     if (error.response) {
       if (error.response.status === 401) {
-        toast.error("Unauthorized! Please check your API key.");
+        toast.error('Unauthorized! Please check your API key.');
       } else if (error.response.status === 403) {
         toast.error("Forbidden! You don't have permission.");
       } else {
-        toast.error(error.response.data?.message || "Something went wrong!");
+        toast.error(error.response.data?.message || 'Something went wrong!');
       }
     } else if (error.request) {
-      toast.error("Network error! Please try again.");
+      toast.error('Network error! Please try again.');
     } else {
-      toast.error("An unexpected error occurred.");
+      toast.error('An unexpected error occurred.');
     }
-    
+
     return Promise.reject(error);
   }
 );

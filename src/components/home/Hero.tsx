@@ -1,9 +1,9 @@
-"use client"
-import React from "react";
-import { motion } from "framer-motion";
-import Button from "../form/Button";
-import { Parallax } from "react-scroll-parallax";
-import Link from "next/link";
+'use client';
+import React from 'react';
+import { motion } from 'framer-motion';
+import Button from '../form/Button';
+import { Parallax } from 'react-scroll-parallax';
+import Link from 'next/link';
 
 const Hero: React.FC = () => {
   return (
@@ -12,13 +12,13 @@ const Hero: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           className="hero-card border-[1px] border-stroke rounded-lg flex flex-col gap-6 p-8 backdrop-blur-xl"
         >
           <motion.h4
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+            transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
             className="font-orbitron text-white text-[1.6em] md:text-[2.5rem] font-bold"
           >
             Seamless Airtime & Data Purchases with Starknet 🚀
@@ -26,31 +26,32 @@ const Hero: React.FC = () => {
           <motion.p
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
             className="text-white text-sm lg:text-lg"
           >
-            Buy airtime and mobile data instantly using decentralized, fast, and
-            low-cost transactions on Starknet. No middlemen. No delays. Just
-            pure efficiency.
+            Buy airtime and mobile data instantly using decentralized, fast, and low-cost
+            transactions on Starknet. No middlemen. No delays. Just pure efficiency.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
+            transition={{ duration: 0.8, delay: 0.7, ease: 'easeOut' }}
           >
-            <Link href="/pay-bill"><Button className="w-fit py-5 px-7">Launch app</Button></Link>
+            <Link href="/pay-bill">
+              <Button className="w-fit py-5 px-7">Launch app</Button>
+            </Link>
           </motion.div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           className="justify-center hidden md:flex"
         >
           <motion.video
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
             autoPlay
             loop
             muted

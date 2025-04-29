@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface InputFieldProps {
   id: string;
@@ -18,8 +18,8 @@ export default function InputField({
   id,
   value,
   onChange,
-  type = "text",
-  placeholder = "",
+  type = 'text',
+  placeholder = '',
   label,
   required = false,
   networkLogo,
@@ -57,4 +57,3 @@ export default function InputField({
     </div>
   );
 }
-  

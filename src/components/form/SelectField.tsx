@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface Option {
   PRODUCT_ID?: string;
@@ -20,7 +20,7 @@ interface SelectFieldProps {
   required?: boolean;
   networkLogo?: string;
   disabled?: boolean;
-  type?: "dataplan" | "electric" | "betting" | "cable" | "TV";
+  type?: 'dataplan' | 'electric' | 'betting' | 'cable' | 'TV';
 }
 
 export default function SelectField({
@@ -32,7 +32,7 @@ export default function SelectField({
   required = false,
   networkLogo,
   disabled,
-  type = "dataplan",
+  type = 'dataplan',
 }: SelectFieldProps) {
   return (
     <div className="relative mb-4">
@@ -54,7 +54,7 @@ export default function SelectField({
           value={value}
           onChange={onChange}
           className={`appearance-none text-white ring-2 ring-primary rounded-lg w-full py-3 px-4 text-background leading-tight focus:outline-none focus:ring-2 focus:ring-primary transition-all bg-transparent ${
-            networkLogo ? "pr-12" : ""
+            networkLogo ? 'pr-12' : ''
           }`}
           required={required}
           disabled={disabled}
@@ -66,22 +66,22 @@ export default function SelectField({
             <option
               key={index}
               value={
-                type === "dataplan"
+                type === 'dataplan'
                   ? option.PRODUCT_ID
-                  : type === "electric"
-                  ? option.code
-                  : type === "betting"
-                  ? option.PRODUCT_CODE
-                  : option.PACKAGE_ID
+                  : type === 'electric'
+                    ? option.code
+                    : type === 'betting'
+                      ? option.PRODUCT_CODE
+                      : option.PACKAGE_ID
               }
             >
-              {type === "dataplan" ? (
+              {type === 'dataplan' ? (
                 <>
                   {option.PRODUCT_NAME} - ₦{Math.ceil(option.PRODUCT_AMOUNT)}
                 </>
-              ) : type === "electric" ? (
+              ) : type === 'electric' ? (
                 <>{option.name}</>
-              ) : type === "betting" ? (
+              ) : type === 'betting' ? (
                 <>{option.PRODUCT_CODE?.toUpperCase()}</>
               ) : (
                 <>{option.PACKAGE_NAME}</>

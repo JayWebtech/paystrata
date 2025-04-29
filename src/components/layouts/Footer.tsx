@@ -1,7 +1,7 @@
-"use client";
-import React from "react";
-import { motion } from "framer-motion";
-import { MoveUpRight, Twitter } from "lucide-react";
+'use client';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { MoveUpRight, Twitter } from 'lucide-react';
 
 interface FooterItem {
   name: string;
@@ -16,22 +16,22 @@ interface SocialMedia {
 }
 
 const footerItems: FooterItem[] = [
-  { name: "Home", icon: <MoveUpRight size={26} />, link: "/" },
-  { name: "About Us", icon: <MoveUpRight size={26} />, link: "/about" },
+  { name: 'Home', icon: <MoveUpRight size={26} />, link: '/' },
+  { name: 'About Us', icon: <MoveUpRight size={26} />, link: '/about' },
   {
-    name: "Terms and Conditions",
+    name: 'Terms and Conditions',
     icon: <MoveUpRight size={26} />,
-    link: "/terms",
+    link: '/terms',
   },
   {
-    name: "Join Our Community",
+    name: 'Join Our Community',
     icon: <MoveUpRight size={26} />,
-    link: "/community",
+    link: '/community',
   },
 ];
 
 const socialMedia: SocialMedia[] = [
-  { name: "Twitter", icon: <Twitter size={40} />, link: "https://twitter.com" },
+  { name: 'Twitter', icon: <Twitter size={40} />, link: 'https://twitter.com' },
 ];
 
 const Footer: React.FC = () => {

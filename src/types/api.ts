@@ -43,4 +43,4 @@ export interface ElectricityProvider {
 
 export interface BettingProvider {
   PRODUCT_CODE: string;
-} 
+}

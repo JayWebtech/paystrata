@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @config "../../tailwind.config.mjs";
 
 ::-webkit-scrollbar {
@@ -19,7 +19,6 @@
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #6c17d4, #a869f4);
 }
-
 
 * {
   scrollbar-width: thin;
@@ -48,8 +47,8 @@ body {
 
 .hero-card {
   background-image: radial-gradient(circle, #7b14f933, #864fcb73);
-  box-shadow: 
+  box-shadow:
     inset 4px 4px 10px rgba(255, 255, 255, 0.05),
     inset -4px -4px 10px rgba(0, 0, 0, 0.15),
-    4px 4px 10px rgba(0, 0, 0, 0.1); 
+    4px 4px 10px rgba(0, 0, 0, 0.1);
 }

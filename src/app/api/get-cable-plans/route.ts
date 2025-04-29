@@ -1,5 +1,5 @@
-import axios from "axios";
-import { NextRequest } from "next/server";
+import axios from 'axios';
+import { NextRequest } from 'next/server';
 
 interface CableResponse {
   status: boolean;
@@ -22,30 +22,27 @@ export async function POST(req: NextRequest): Promise<Response> {
     const allData = response.data.TV_ID;
 
     if (!allData || !allData[providerCode]) {
-      return new Response(
-        JSON.stringify({ status: false, msg: "Provider not found" }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ status: false, msg: 'Provider not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     const providerPlans = allData[providerCode]?.[0]?.PRODUCT || [];
 
     return new Response(JSON.stringify({ status: true, data: providerPlans }), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
     return new Response(
       JSON.stringify({
         status: false,
-        message: error.message || "Error fetching TV plans",
+        message: error.message || 'Error fetching TV plans',
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }

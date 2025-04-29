@@ -1,5 +1,5 @@
-import axios from "axios";
-import { NextRequest } from "next/server";
+import axios from 'axios';
+import { NextRequest } from 'next/server';
 
 interface DataResponse {
   status: boolean;
@@ -22,28 +22,25 @@ export async function POST(req: NextRequest): Promise<Response> {
     const data = response.data.MOBILE_NETWORK;
 
     if (!data[network]) {
-      return new Response(
-        JSON.stringify({ status: false, msg: "Data network not found" }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ status: false, msg: 'Data network not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     return new Response(JSON.stringify({ status: true, data: data[network] }), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
     return new Response(
       JSON.stringify({
         status: false,
-        message: error.message || "Error sending request",
+        message: error.message || 'Error sending request',
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }

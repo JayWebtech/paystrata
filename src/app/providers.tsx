@@ -1,49 +1,60 @@
-"use client";
-import { sepolia, mainnet } from "@starknet-react/chains";
+'use client';
+import { ReactNode, useCallback } from 'react';
+import { ArgentMobileConnector } from 'starknetkit/argentMobile';
+import { WebWalletConnector } from 'starknetkit/webwallet';
+import { sepolia, mainnet, Chain } from '@starknet-react/chains';
 import {
-  StarknetConfig,
-  publicProvider,
   argent,
   braavos,
+  Connector,
+  StarknetConfig,
+  starkscan,
   useInjectedConnectors,
-  voyager,
-} from "@starknet-react/core";
-import { ReactNode } from "react";
-import { InjectedConnector } from "starknetkit/injected";
-import { WebWalletConnector } from "starknetkit/webwallet";
-import { Connector } from "@starknet-react/core";
-import { ArgentMobileConnector } from "starknetkit/argentMobile"
-import { StarknetkitConnector } from "starknetkit";
+} from '@starknet-react/core';
+
+import { jsonRpcProvider } from '@starknet-react/core';
 
 interface ProvidersProps {
   children: ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
-  const connectors = [
-    new InjectedConnector({
-      options: { id: "argentX", name: "Argent X" },
-    }),
-    new InjectedConnector({
-      options: { id: "braavos", name: "Braavos" },
-    }),
-    new WebWalletConnector({ url: "https://web.argent.xyz" }),
-    ArgentMobileConnector.init({
-      options: {
-        dappName: 'Starkpay',
-        url: "https://starkpay-seven.vercel.app",
-        projectId: "93392c1b1fdd1f4987f02543117520bf"
-      }
-    }) as StarknetkitConnector,
-  ];
+  const chains = [mainnet, sepolia];
+  const { connectors: injected } = useInjectedConnectors({
+    recommended: [argent(), braavos()],
+    includeRecommended: 'always',
+  });
 
+  const rpc = useCallback((chain: Chain) => {
+    return {
+      nodeUrl: `https://free-rpc.nethermind.io/sepolia-juno`,
+    };
+  }, []);
+
+  const provider = jsonRpcProvider({ rpc });
+
+  const ArgentMobile = ArgentMobileConnector.init({
+    options: {
+      dappName: 'Token bound explorer',
+      url: 'https://www.tbaexplorer.com/',
+    },
+    inAppBrowserOptions: {},
+  });
+
+  const connectors = [
+    ...injected,
+    new WebWalletConnector({
+      url: 'https://web.argent.xyz',
+    }) as never as Connector,
+    ArgentMobile as never as Connector,
+  ];
   return (
     <StarknetConfig
-      chains={[mainnet, sepolia]}
-      provider={publicProvider()}
-      connectors={connectors as Connector[]}
-      explorer={voyager}
-      autoConnect={true}
+      chains={chains}
+      provider={provider}
+      connectors={connectors}
+      explorer={starkscan}
+      autoConnect
     >
       {children}
     </StarknetConfig>
