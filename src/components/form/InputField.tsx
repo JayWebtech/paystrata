@@ -12,6 +12,7 @@ interface InputFieldProps {
   max?: number;
   min?: number;
   name?: string;
+  disabled?: boolean;
 }
 
 export default function InputField({
@@ -26,6 +27,7 @@ export default function InputField({
   max,
   min,
   name,
+  disabled = false,
 }: InputFieldProps) {
   return (
     <div className="relative mb-4">
@@ -49,9 +51,10 @@ export default function InputField({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`appearance-none text-white ring-2 ring-primary rounded-lg w-full py-3 px-4 text-background leading-tight focus:outline-none focus:ring-2 focus:ring-primary transition-all bg-transparent ${networkLogo ? 'pr-12' : ''}`}
+          className={`appearance-none text-white ring-2 ring-primary rounded-lg w-full py-3 px-4 text-background leading-tight focus:outline-none focus:ring-2 focus:ring-primary transition-all bg-transparent ${networkLogo ? 'pr-12' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           required={required}
           maxLength={max}
+          disabled={disabled}
         />
       </div>
     </div>

@@ -57,7 +57,7 @@ const WhyChooseUs: React.FC = () => {
           >
             {feature.video && (
               <motion.div
-                className="absolute top-0 left-0 w-full h-full bg-cover bg-center"
+                className="absolute top-0 left-0 w-full h-full bg-contain bg-center"
                 style={{ backgroundImage: `url(${feature.video})` }}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}

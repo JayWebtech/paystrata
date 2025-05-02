@@ -11,7 +11,15 @@ import { TVProviders } from '@/data/TVProviders';
 import LoadingIndicator from '../loader/LoadingIndicator';
 import { ElectricityProviders } from '@/data/ElectricityCompany';
 import { DataPlan, TVPlan, UtilityPlan, TVProvider } from '@/types/api';
-import { useAccount } from '@starknet-react/core';
+import { useAccount, useContract, useNetwork, useSendTransaction } from '@starknet-react/core';
+import { starkpay_abi } from '@/contracts/abi';
+import { Call, shortString } from 'starknet';
+import { nanoid } from 'nanoid';
+import { getSupportedTokens, getContractAddress } from '@/constants/token';
+import { formatSTRKAmount } from '@/utils/formatStrkAmount';
+import TimeoutModal from '../modal/TimeoutModal';
+import { Loader2 } from 'lucide-react';
+import SuccessModal from '../modal/SuccessModal';
 
 interface FormState {
   phoneNumber: string;
@@ -21,7 +29,7 @@ interface FormState {
 }
 
 const PayBillForm: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('buy-data');
+  const [activeTab, setActiveTab] = useState<string>('buy-airtime');
   const [formState, setFormState] = useState<FormState>({
     phoneNumber: '',
     amount: '',
@@ -38,7 +46,25 @@ const PayBillForm: React.FC = () => {
   const [selectedUtility, setSelectedUtility] = useState<string | null>(null);
   const [utilityPlans, setUtilityPlans] = useState<UtilityPlan[]>([]);
   const [selectedUtilityPlan, setSelectedUtilityPlan] = useState<UtilityPlan | null>(null);
-  const { address } = useAccount();
+  const [starkAmount, setStarkAmount] = useState<string | null>(null);
+  const [amountInSTRK, setAmountInSTRK] = useState<number | null>(null);
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successTxHash, setSuccessTxHash] = useState('');
+  const [networkCode, setNetworkCode] = useState<string | null>(null);
+
+  const { address, account } = useAccount();
+  
+  const [isMainnet, setIsMainnet] = useState<boolean>(true);
+  const { chain } = useNetwork();
+  const CONTRACT_ADDRESS = getContractAddress(isMainnet);
+  const SUPPORTED_TOKENS = getSupportedTokens(isMainnet);
+
+  // const { contract } = useContract({
+  //   abi: starkpay_abi,
+  //   address: CONTRACT_ADDRESS as `0x${string}`,
+  // });
 
   const detectProvider = useCallback(
     (number: string) => {
@@ -48,6 +74,7 @@ const PayBillForm: React.FC = () => {
 
         if (provider) {
           setNetworkLogo(provider.logo);
+          setNetworkCode(provider.name);
           if (!dataPlans && activeTab === 'buy-data') {
             getDataPlans(provider.name);
           }
@@ -128,30 +155,172 @@ const PayBillForm: React.FC = () => {
     }
   }, []);
 
+  const getTxnType = () => {
+    switch (activeTab) {
+      case 'buy-data':
+        return shortString.encodeShortString('Data');
+      case 'buy-airtime':
+        return shortString.encodeShortString('Airtime');
+      case 'pay-cable':
+        return shortString.encodeShortString('Cable');
+      case 'pay-utility':
+        return shortString.encodeShortString('Utility');
+      default:
+        break;
+    }
+  };
+
   const handlePayment = useCallback(async () => {
-    if (!address) {
+    if (!address || !account) {
       toast.error('Please connect your wallet to proceed');
       return;
     }
-    if (!formState.phoneNumber) {
+
+    if (activeTab !== 'pay-utility' && !formState.phoneNumber) {
       toast.error('Phone number is required');
       return;
     }
 
-    if (formState.phoneNumber.length < 11) {
+    if (activeTab !== 'pay-utility' && formState?.phoneNumber?.length < 11) {
       toast.error('Phone number must be 11 digits');
       return;
     }
 
-    if (activeTab === 'buy-data') {
+    if (!starkAmount) {
+      toast.error('No amount found, please refresh the page');
+      return;
     }
-  }, [formState, address]);
+
+    if (!networkLogo) {
+      toast.error('You entered an invalid number');
+      return;
+    }
+
+    let refcode = nanoid(10);
+    refcode = shortString.encodeShortString(refcode);
+    let type = getTxnType();
+    let txHash = '';
+    
+    // Handle the amount as a BigInt with proper decimal places
+    const amount = BigInt(amountInSTRK || 0);
+    const low = amount & BigInt('0xffffffffffffffffffffffffffffffff');
+    const high = amount >> BigInt(128);
+
+    try {
+      setIsBtnLoading(true);
+      const calls: Call[] = [
+        {
+          entrypoint: 'approve',
+          contractAddress: SUPPORTED_TOKENS.STRK.address,
+          calldata: [CONTRACT_ADDRESS as `0x${string}`, low.toString(), high.toString()],
+        },
+        {
+          entrypoint: 'transaction',
+          contractAddress: CONTRACT_ADDRESS as `0x${string}`,
+          calldata: [refcode.toString(), low.toString(), high.toString(), type?.toString() || ''],
+        },
+      ];
+      const result = await account?.execute(calls);
+      txHash = result?.transaction_hash;
+
+      const receiptStatus = await account.waitForTransaction(txHash);
+
+      if (receiptStatus.statusReceipt === "success") {
+        if (activeTab === 'buy-airtime') {
+          try {
+            const airtimeResponse = await axios.post('/api/buy-airtime', {
+              networkCode,
+              phoneNumber: formState.phoneNumber,
+              amount: formState.amount,
+            });
+
+            if (airtimeResponse.data.status) {
+              setFormState({
+                phoneNumber: '',
+                amount: '',
+                IUCNumber: '',
+                meterNumber: '',
+              })
+              setSuccessTxHash(txHash);
+              setShowSuccessModal(true);
+            } else {
+              toast.error(airtimeResponse.data.msg || 'Failed to buy airtime');
+            }
+          } catch (error: any) {
+            toast.error(error?.message || 'Failed to buy airtime');
+          }
+        }
+      } else {
+        toast.error('Transaction failed');
+      }
+
+    } catch (error) {
+      console.error('Error during contract calls:', error);
+      toast.error(error instanceof Error
+        ? `Contract interaction failed: ${error.message}`
+        : 'Contract interaction failed with unknown error')
+    } finally {
+      setIsBtnLoading(false);
+    }
+  }, [formState, address, amountInSTRK]);
+
+  const getStarkAmount = useCallback(async () => {
+    try {
+      const response = await axios.post('/api/get-stark-price');
+      if (response?.data?.status) {
+        setStarkAmount(response?.data?.data?.starknet?.ngn);
+      } else {
+        toast.error(response.data.message || 'Failed to fetch Stark amount, try again');
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to fetch Stark amount, try again');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (formState.amount && starkAmount) {
+      const ngnAmount = parseFloat(formState.amount);
+      const strkPrice = parseFloat(starkAmount);
+      const strkAmount = ((ngnAmount / strkPrice)+1);
+      const amountInWei = BigInt(Math.floor(strkAmount * 1e18));
+      setAmountInSTRK(Number(amountInWei));
+    }
+  }, [formState.amount, starkAmount]);
 
   useEffect(() => {
     if (selectedTV) {
       getTVPlans(selectedTV.name);
     }
   }, [selectedTV, getTVPlans]);
+
+  useEffect(() => {
+    getStarkAmount();
+  }, []);
+
+  useEffect(() => {
+    if (!chain) return;
+
+    if (chain.network !== 'mainnet') {
+      setIsMainnet(false);
+      toast.error(
+        'You are currently on Testnet. Switch to Starknet Mainnet to make real purchase.',
+        {
+          icon: '🚨',
+        }
+      );
+    } else {
+      setIsMainnet(true);
+      toast.dismiss();
+    }
+  }, [chain]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setShowTimeoutModal(true);
+    }, 15 * 60 * 1000); // 15 minutes
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 pt-10">
@@ -170,6 +339,33 @@ const PayBillForm: React.FC = () => {
         />
 
         <div className="hero-card border-[1px] border-stroke rounded-lg flex flex-col gap-3 p-8 backdrop-blur-xl mt-5">
+        {activeTab === 'buy-airtime' && (
+            <>
+              <InputField
+                id="phoneNumber"
+                label="Phone Number"
+                placeholder="Enter phone number"
+                name="phoneNumber"
+                value={formState.phoneNumber}
+                onChange={handleInputChange}
+                networkLogo={networkLogo}
+                max={11}
+                disabled={isBtnLoading}
+              />
+
+              <InputField
+                id="amount"
+                type="number"
+                name="amount"
+                label="Airtime Amount"
+                placeholder="Enter amount"
+                value={formState.amount}
+                onChange={handleInputChange}
+                disabled={isBtnLoading}
+              />
+            </>
+          )}
+
           {activeTab === 'buy-data' && (
             <>
               <InputField
@@ -182,6 +378,7 @@ const PayBillForm: React.FC = () => {
                 networkLogo={networkLogo}
                 type="numeric"
                 max={11}
+                disabled={isBtnLoading}
               />
               {dataPlans && (
                 <SelectField
@@ -191,33 +388,9 @@ const PayBillForm: React.FC = () => {
                   label="Select data plans"
                   options={dataPlans}
                   required={true}
+                  disabled={isBtnLoading}
                 />
               )}
-            </>
-          )}
-
-          {activeTab === 'buy-airtime' && (
-            <>
-              <InputField
-                id="phoneNumber"
-                label="Phone Number"
-                placeholder="Enter phone number"
-                name="phoneNumber"
-                value={formState.phoneNumber}
-                onChange={handleInputChange}
-                networkLogo={networkLogo}
-                max={11}
-              />
-
-              <InputField
-                id="amount"
-                type="number"
-                name="amount"
-                label="Airtime Amount"
-                placeholder="Enter amount"
-                value={formState.amount}
-                onChange={handleInputChange}
-              />
             </>
           )}
 
@@ -259,6 +432,7 @@ const PayBillForm: React.FC = () => {
                     options={tVPlans}
                     required={true}
                     type="TV"
+                    disabled={isBtnLoading}
                   />
                   <InputField
                     id="iucNumber"
@@ -268,6 +442,7 @@ const PayBillForm: React.FC = () => {
                     value={formState.IUCNumber}
                     type="number"
                     onChange={handleInputChange}
+                    disabled={isBtnLoading}
                   />
                   <InputField
                     id="phoneNumber"
@@ -279,6 +454,7 @@ const PayBillForm: React.FC = () => {
                     networkLogo={networkLogo}
                     type="numeric"
                     max={11}
+                    disabled={isBtnLoading}
                   />
                 </>
               )}
@@ -297,6 +473,7 @@ const PayBillForm: React.FC = () => {
                   getUtilityPlans(e.target.value);
                 }}
                 type="electric"
+                disabled={isBtnLoading}
               />
               {selectedUtility && utilityPlans.length > 0 && (
                 <>
@@ -334,6 +511,7 @@ const PayBillForm: React.FC = () => {
                         meterNumber: e.target.value,
                       }))
                     }
+                    disabled={isBtnLoading}
                   />
 
                   <InputField
@@ -351,17 +529,31 @@ const PayBillForm: React.FC = () => {
                     }
                     min={selectedUtilityPlan.MINIMUN_AMOUNT}
                     max={selectedUtilityPlan.MAXIMUM_AMOUNT}
+                    disabled={isBtnLoading}
                   />
                 </>
               )}
             </>
           )}
+          {starkAmount && address && account && formState?.amount && (
+            <div className="text-white text-sm">You will pay: {formatSTRKAmount(amountInSTRK)} STRK</div>
+          )}
         </div>
 
-        <Button className="mt-5 py-5 w-full" onClick={handlePayment}>
-          Pay now
+        <Button className="my-5 py-5 w-full flex items-center justify-center" onClick={handlePayment} disabled={isBtnLoading}>
+          {isBtnLoading ? <Loader2 className='animate-spin duration-500' color='white' /> : 'Pay now'}
         </Button>
       </div>
+      <TimeoutModal 
+        isOpen={showTimeoutModal} 
+        onClose={() => window.location.reload()} 
+      />
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        txHash={successTxHash}
+        isMainnet={isMainnet}
+      />
     </div>
   );
 };

@@ -29,8 +29,8 @@ const Tabs: React.FC<TabsProps> = ({
   setDataPlans,
 }) => {
   const tabs: Tab[] = [
-    { name: 'Data', id: 'buy-data', icon: <Database className="w-4 h-4 md:w-6 md:h-6" /> },
     { name: 'Airtime', id: 'buy-airtime', icon: <PhoneCall className="w-4 h-4 md:w-6 md:h-6" /> },
+    { name: 'Data', id: 'buy-data', icon: <Database className="w-4 h-4 md:w-6 md:h-6" /> },
     { name: 'Cable', id: 'pay-cable', icon: <Tv className="w-4 h-4 md:w-6 md:h-6" /> },
     { name: 'Utility', id: 'pay-utility', icon: <Lightbulb className="w-4 h-4 md:w-6 md:h-6" /> },
   ];

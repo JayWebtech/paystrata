@@ -1,4 +1,4 @@
-[
+export const starkpay_abi = [
   {
     "type": "impl",
     "name": "Starkpay",
@@ -398,4 +398,4 @@
       }
     ]
   }
-]
+] as const;
