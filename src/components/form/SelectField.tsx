@@ -11,10 +11,20 @@ interface Option {
   PACKAGE_NAME?: string;
 }
 
+interface DataPlanValue {
+  PRODUCT_ID: string;
+  PRODUCT_AMOUNT: number;
+}
+
+interface TVValue {
+  PACKAGE_ID: string;
+  PACKAGE_AMOUNT: number;
+}
+
 interface SelectFieldProps {
   id: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  value: string | DataPlanValue | TVValue;
+  onChange: (value: string | DataPlanValue | TVValue) => void;
   options: any[];
   label?: string;
   required?: boolean;
@@ -34,6 +44,37 @@ export default function SelectField({
   disabled,
   type = 'dataplan',
 }: SelectFieldProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (type === 'dataplan') {
+      const selectedOption = options.find(opt => opt.PRODUCT_ID === e.target.value);
+      if (selectedOption) {
+        onChange({
+          PRODUCT_ID: selectedOption.PRODUCT_ID,
+          PRODUCT_AMOUNT: selectedOption.PRODUCT_AMOUNT
+        });
+      }
+    } else if (type === 'TV') {
+      const selectedOption = options.find(opt => opt.PACKAGE_ID === e.target.value);
+      if (selectedOption) {
+        onChange({
+          PACKAGE_ID: selectedOption.PACKAGE_ID,
+          PACKAGE_AMOUNT: selectedOption.PACKAGE_AMOUNT,
+        });
+      }
+    } else {
+      onChange(e.target.value);
+    }
+  };
+
+  const getValue = () => {
+    if (type === 'dataplan' && typeof value === 'object') {
+      return (value as DataPlanValue).PRODUCT_ID;
+    } else if (type === 'TV' && typeof value === 'object') {
+      return (value as TVValue).PACKAGE_ID;
+    }
+    return value as string;
+  };
+
   return (
     <div className="relative mb-4">
       {label && (
@@ -51,8 +92,8 @@ export default function SelectField({
         )}
         <select
           id={id}
-          value={value}
-          onChange={onChange}
+          value={getValue()}
+          onChange={handleChange}
           className={`appearance-none text-white ring-2 ring-primary rounded-lg w-full py-3 px-4 text-background leading-tight focus:outline-none focus:ring-2 focus:ring-primary transition-all bg-transparent ${
             networkLogo ? 'pr-12' : ''
           }`}
@@ -70,9 +111,7 @@ export default function SelectField({
                   ? option.PRODUCT_ID
                   : type === 'electric'
                     ? option.code
-                    : type === 'betting'
-                      ? option.PRODUCT_CODE
-                      : option.PACKAGE_ID
+                    : option.PACKAGE_ID
               }
             >
               {type === 'dataplan' ? (
@@ -81,8 +120,6 @@ export default function SelectField({
                 </>
               ) : type === 'electric' ? (
                 <>{option.name}</>
-              ) : type === 'betting' ? (
-                <>{option.PRODUCT_CODE?.toUpperCase()}</>
               ) : (
                 <>{option.PACKAGE_NAME}</>
               )}

@@ -17,6 +17,7 @@ interface TabsProps {
   setPhoneNumber?: (number: string) => void;
   setNetworkLogo?: (logo: string | null) => void;
   setDataPlans?: (plans: any) => void;
+  setFormState?: (state: any) => void;
 }
 
 const Tabs: React.FC<TabsProps> = ({
@@ -27,6 +28,7 @@ const Tabs: React.FC<TabsProps> = ({
   setPhoneNumber,
   setNetworkLogo,
   setDataPlans,
+  setFormState,
 }) => {
   const tabs: Tab[] = [
     { name: 'Airtime', id: 'buy-airtime', icon: <PhoneCall className="w-4 h-4 md:w-6 md:h-6" /> },
@@ -51,6 +53,12 @@ const Tabs: React.FC<TabsProps> = ({
             if (setPhoneNumber) setPhoneNumber('');
             if (setNetworkLogo) setNetworkLogo(null);
             if (setDataPlans) setDataPlans(null);
+            if (setFormState) setFormState({
+              phoneNumber: '',
+              amount: '',
+              IUCNumber: '',
+              meterNumber: '',
+            });
           }}
         >
           <span className="flex items-center flex-col gap-1 md:gap-2">

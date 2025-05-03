@@ -176,6 +176,26 @@ const PayBillForm: React.FC = () => {
       return;
     }
 
+    if(formState.amount === '') {
+      toast.error('Amount is required');
+      return;
+    }
+
+    if(parseFloat(formState.amount) < 100) {
+      toast.error('Amount must be greater than 100');
+      return;
+    }
+
+    if(activeTab === "pay-cable" && selectedTV) {
+      toast.error('Please select a TV provider');
+      return;
+    }
+
+    if(activeTab === "pay-cable" && !formState.IUCNumber) {
+      toast.error('IUC Number is required');
+      return;
+    }
+
     if (activeTab !== 'pay-utility' && !formState.phoneNumber) {
       toast.error('Phone number is required');
       return;
@@ -244,10 +264,87 @@ const PayBillForm: React.FC = () => {
               setSuccessTxHash(txHash);
               setShowSuccessModal(true);
             } else {
-              toast.error(airtimeResponse.data.msg || 'Failed to buy airtime');
+              toast.error(airtimeResponse.data.message || 'Failed to buy airtime');
             }
           } catch (error: any) {
             toast.error(error?.message || 'Failed to buy airtime');
+          }
+        }
+        if (activeTab === 'buy-data') {
+          try {
+            const dataResponse = await axios.post('/api/buy-data', {
+              networkCode,
+              phoneNumber: formState.phoneNumber,
+              planId: selectedPlan,
+            });
+
+            if (dataResponse.data.status) {
+              setFormState({
+                phoneNumber: '',
+                amount: '',
+                IUCNumber: '',
+                meterNumber: '',
+              })
+              setSuccessTxHash(txHash);
+              setShowSuccessModal(true);
+            } else {
+              toast.error(dataResponse.data.msg || 'Failed to buy data');
+            }
+          } catch (error: any) {
+            toast.error(error?.message || 'Failed to buy data');
+          }
+        }
+
+        if (activeTab === 'pay-cable') {
+          try {
+            const cableResponse = await axios.post('/api/pay-cable', {
+              tvcode: selectedTV?.code,
+              pacakge_code: selectedTVPlan, 
+              SmartCardNo: formState.IUCNumber,
+              PhoneNo: formState.phoneNumber,
+            });
+
+            if (cableResponse.data.status) {
+              setFormState({
+                phoneNumber: '',
+                amount: '',
+                IUCNumber: '',
+                meterNumber: '',
+              })
+              setSuccessTxHash(txHash);
+              setShowSuccessModal(true);
+            } else {
+              toast.error(cableResponse.data.msg || 'Failed to pay cable');
+            }
+          } catch (error: any) {
+            toast.error(error?.message || 'Failed to pay cable');
+          }
+        }
+
+        if (activeTab === 'pay-utility') {
+          try {
+            const utilityResponse = await axios.post('/api/pay-utility', {
+              electric_company_code: selectedUtility,
+              meter_type: selectedUtilityPlan?.PRODUCT_TYPE,
+              meter_no: formState.meterNumber,
+              amount: formState.amount,
+              phone_no: formState.phoneNumber,
+            });
+
+            if (utilityResponse.data.status) {
+              setFormState({
+                meterNumber: '',
+                amount: '',
+                phoneNumber: '',
+                IUCNumber: '',
+              })
+              setSuccessTxHash(txHash);
+              setShowSuccessModal(true);
+            } else {
+              toast.error(utilityResponse.data.msg || 'Failed to pay utility');
+            }
+          } catch (error: any) {
+            toast.error(error?.message || 'Failed to pay utility');
           }
         }
       } else {
@@ -336,6 +433,7 @@ const PayBillForm: React.FC = () => {
           setDataPlans={setDataPlans}
           setIsLoading={setIsLoading}
           isLoading={isLoading}
+          setFormState={setFormState}
         />
 
         <div className="hero-card border-[1px] border-stroke rounded-lg flex flex-col gap-3 p-8 backdrop-blur-xl mt-5">
@@ -359,6 +457,7 @@ const PayBillForm: React.FC = () => {
                 name="amount"
                 label="Airtime Amount"
                 placeholder="Enter amount"
+
                 value={formState.amount}
                 onChange={handleInputChange}
                 disabled={isBtnLoading}
@@ -384,7 +483,15 @@ const PayBillForm: React.FC = () => {
                 <SelectField
                   id="dataPlan"
                   value={selectedPlan || ''}
-                  onChange={(e) => setSelectedPlan(e.target.value)}
+                  onChange={(value) => {
+                    if (typeof value === 'object' && 'PRODUCT_ID' in value) {
+                      setSelectedPlan(value.PRODUCT_ID);
+                      setFormState(prev => ({
+                        ...prev,
+                        amount: value.PRODUCT_AMOUNT.toString()
+                      }));
+                    }
+                  }}
                   label="Select data plans"
                   options={dataPlans}
                   required={true}
@@ -427,7 +534,15 @@ const PayBillForm: React.FC = () => {
                   <SelectField
                     id="tvPlan"
                     value={selectedTVPlan}
-                    onChange={(e) => setSelectedTVPlan(e.target.value)}
+                    onChange={(value) => {
+                      if (typeof value === 'object' && 'PACKAGE_ID' in value) {
+                        setSelectedTVPlan(value.PACKAGE_ID);
+                        setFormState(prev => ({
+                          ...prev,
+                          amount: value.PACKAGE_AMOUNT.toString()
+                        }));
+                      }
+                    }}
                     label="Select TV plans"
                     options={tVPlans}
                     required={true}
@@ -468,9 +583,11 @@ const PayBillForm: React.FC = () => {
                 value={selectedUtility || ''}
                 label="Electricity Provider"
                 options={ElectricityProviders}
-                onChange={(e) => {
-                  setSelectedUtility(e.target.value);
-                  getUtilityPlans(e.target.value);
+                onChange={(value) => {
+                  if (typeof value === 'string') {
+                    setSelectedUtility(value);
+                    getUtilityPlans(value);
+                  }
                 }}
                 type="electric"
                 disabled={isBtnLoading}
