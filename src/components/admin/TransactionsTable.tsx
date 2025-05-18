@@ -225,7 +225,7 @@ export default function TransactionsTable() {
                               <body class="bg-gray-100 p-8">
                                 <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
                                   <div class="text-center border-b pb-4">
-                                    <h2 class="text-2xl font-bold text-gray-900">StarkPay</h2>
+                                    <h2 class="text-2xl font-bold text-gray-900">Paystrata</h2>
                                     <p class="text-sm text-gray-500">Transaction Receipt</p>
                                   </div>
                                   
@@ -295,7 +295,7 @@ export default function TransactionsTable() {
                                   </div>
 
                                   <div class="mt-6 pt-4 border-t text-center">
-                                    <p class="text-xs text-gray-500">Thank you for using StarkPay</p>
+                                    <p class="text-xs text-gray-500">Thank you for using Paystrata</p>
                                     <p class="text-xs text-gray-500 mt-1">This receipt serves as proof of your transaction</p>
                                   </div>
                                 </div>

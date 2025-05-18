@@ -121,7 +121,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
           </div>
           
           <div className="text-xs text-gray-400 mb-4">
-            <p>Thank you for using StarkPay</p>
+            <p>Thank you for using Paystrata</p>
             <p className="mt-1">This receipt serves as proof of your transaction</p>
           </div>
           

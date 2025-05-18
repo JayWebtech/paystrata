@@ -15,24 +15,24 @@ const orbitron = Orbitron({
 });
 
 export const metadata = {
-  title: 'StarkPay',
-  description: 'StarkPay - A modern payment solution built on Starknet',
-  keywords: ['StarkPay', 'Starknet', 'crypto payments', 'blockchain payments', 'web3'],
-  authors: [{ name: 'StarkPay Team' }],
-  creator: 'StarkPay',
-  publisher: 'StarkPay',
-  metadataBase: new URL('https://usestarkpay.com'),
+  title: 'Paystrata',
+  description: 'Paystrata - A modern payment solution built on Starknet',
+  keywords: ['Paystrata', 'Starknet', 'crypto payments', 'blockchain payments', 'web3'],
+  authors: [{ name: 'Paystrata Team' }],
+  creator: 'Paystrata',
+  publisher: 'Paystrata',
+  metadataBase: new URL('https://usePaystrata.com'),
   openGraph: {
-    title: 'StarkPay',
-    description: 'StarkPay - A modern payment solution built on StarkNet',
-    url: 'https://usestarkpay.com',
-    siteName: 'StarkPay',
+    title: 'Paystrata',
+    description: 'Paystrata - A modern payment solution built on StarkNet',
+    url: 'https://usePaystrata.com',
+    siteName: 'Paystrata',
     images: [
       {
         url: '/img/logo.png',
         width: 1200,
         height: 630,
-        alt: 'StarkPay',
+        alt: 'Paystrata',
       },
     ],
     locale: 'en_US',
@@ -40,10 +40,10 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'StarkPay',
-    description: 'StarkPay - A modern payment solution built on StarkNet',
+    title: 'Paystrata',
+    description: 'Paystrata - A modern payment solution built on StarkNet',
     images: ['/img/logo.png'],
-    creator: '@starkpay',
+    creator: '@Paystrata',
   },
   robots: {
     index: true,

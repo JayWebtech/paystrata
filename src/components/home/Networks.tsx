@@ -31,9 +31,9 @@ const Networks: React.FC = () => {
       <motion.div className="">
         <motion.div variants={textVariants} className="md:col-span-3">
           <span className="text-primary uppercase tracking-widest text-sm">USE</span>
-          <h2 className="text-white text-4xl font-bold mt-3">The StarkPay Ecosystem</h2>
+          <h2 className="text-white text-4xl font-bold mt-3">The Paystrata Ecosystem</h2>
           <p className="text-white mt-4">
-            StarkPay leverages the power of StarkNet to offer seamless, low-fee, and instant airtime
+            Paystrata leverages the power of StarkNet to offer seamless, low-fee, and instant airtime
             and data purchases.<br></br> No banks, no delays – just fast and decentralized
             transactions using StarkNet tokens.
           </p>

@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
         >
           <Link href={'/'}>
             <h1 className="text-2xl font-bold text-white">
-              $tark<span className="text-primary">Pay</span>
+              Pay<span className="text-primary">strata</span>
             </h1>
           </Link>
         </motion.div>

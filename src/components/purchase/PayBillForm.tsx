@@ -11,8 +11,7 @@ import { TVProviders } from '@/data/TVProviders';
 import LoadingIndicator from '../loader/LoadingIndicator';
 import { ElectricityProviders } from '@/data/ElectricityCompany';
 import { DataPlan, TVPlan, UtilityPlan, TVProvider } from '@/types/api';
-import { useAccount, useContract, useNetwork, useSendTransaction } from '@starknet-react/core';
-import { starkpay_abi } from '@/contracts/abi';
+import { useAccount, useNetwork } from '@starknet-react/core';
 import { Call, shortString } from 'starknet';
 import { nanoid } from 'nanoid';
 import { getSupportedTokens, getContractAddress } from '@/constants/token';
@@ -62,11 +61,6 @@ const PayBillForm: React.FC = () => {
   const { chain } = useNetwork();
   const CONTRACT_ADDRESS = getContractAddress(isMainnet);
   const SUPPORTED_TOKENS = getSupportedTokens(isMainnet);
-
-  // const { contract } = useContract({
-  //   abi: starkpay_abi,
-  //   address: CONTRACT_ADDRESS as `0x${string}`,
-  // });
 
   const detectProvider = useCallback(
     (number: string) => {
@@ -177,6 +171,10 @@ const PayBillForm: React.FC = () => {
     //   toast.error('You are currently on Testnet.');
     //   return;
     // }
+    if(!isMainnet && parseFloat(formState.amount) > 100) {
+      toast.error('You are currently on Testnet. Maximum amount is 100');
+      return;
+    }
     if (!address || !account) {
       toast.error('Please connect your wallet to proceed');
       return;

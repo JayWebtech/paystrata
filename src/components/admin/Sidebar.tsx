@@ -56,7 +56,7 @@ export default function Sidebar() {
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
         {/* Logo/Brand */}
         <div className="h-16 flex items-center justify-center border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">StarkPay Admin</h1>
+          <h1 className="text-xl font-bold text-gray-900">Paystrata Admin</h1>
         </div>
 
         {/* Navigation */}
