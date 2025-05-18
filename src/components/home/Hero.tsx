@@ -21,7 +21,7 @@ const Hero: React.FC = () => {
             transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
             className="font-orbitron text-white text-[1.6em] md:text-[2.5rem] font-bold"
           >
-            Seamless Airtime & Data Purchases with Starknet 🚀
+            Pay bills swiftly with Starknet 🚀
           </motion.h4>
           <motion.p
             initial={{ opacity: 0, y: -20 }}
@@ -29,7 +29,7 @@ const Hero: React.FC = () => {
             transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
             className="text-white text-sm lg:text-lg"
           >
-            Buy airtime and mobile data instantly using decentralized, fast, and low-cost
+            Pay utility bills instantly using decentralized, fast, and low-cost
             transactions on Starknet. No middlemen. No delays. Just pure efficiency.
           </motion.p>
           <motion.div
