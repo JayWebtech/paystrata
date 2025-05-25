@@ -167,10 +167,10 @@ const PayBillForm: React.FC = () => {
   };
 
   const handlePayment = useCallback(async () => {
-    if(!isMainnet) {
-      toast.error('You are currently on Testnet.');
-      return;
-    }
+    // if(!isMainnet) {
+    //   toast.error('You are currently on Testnet.');
+    //   return;
+    // }
     // if(!isMainnet && parseFloat(formState.amount) > 100) {
     //   toast.error('You are currently on Testnet. Maximum amount is 100');
     //   return;
@@ -254,15 +254,49 @@ const PayBillForm: React.FC = () => {
       const receiptStatus = await account.waitForTransaction(txHash);
 
       if (receiptStatus.statusReceipt === 'success') {
+        // Store in pending_transactions first
+        const response = await axios.post('/api/store-pending-transaction', {
+          hash: txHash,
+          refcode: base_refcode,
+          wallet_address: address,
+          amount: parseFloat(formState.amount),
+          stark_amount: strkBaseAmount,
+          txn_type: activeTab === 'buy-airtime' 
+            ? 'Airtime' 
+            : activeTab === 'buy-data' 
+              ? 'Data' 
+              : activeTab === 'pay-cable' 
+                ? 'Cable' 
+                : 'Utility',
+          status: 'pending'
+        });
+
+        if (!response?.data?.success) {
+          throw new Error('Failed to store pending transaction');
+        }
+
         if (activeTab === 'buy-airtime') {
           try {
             const airtimeResponse = await axios.post('/api/buy-airtime', {
               networkCode,
               phoneNumber: formState.phoneNumber,
               amount: formState.amount,
+            }, {
+              headers: {
+                'x-transaction-hash': txHash,
+                'x-reference-code': base_refcode
+              }
             });
 
             if (airtimeResponse.data.status) {
+              // Update pending transaction status
+              await axios.post('/api/update-pending-transaction', {
+                hash: txHash,
+                refcode: base_refcode,
+                status: 'completed'
+              });
+
+              // Store in main transactions table
               await axios.post('/api/store-transaction', {
                 amount: formState.amount,
                 txn_type: 'Airtime',
@@ -272,6 +306,7 @@ const PayBillForm: React.FC = () => {
                 refcode: base_refcode,
                 timestamp: new Date().toISOString(),
                 refunded: false,
+                used: true,
                 phone_number: formState.phoneNumber,
                 iuc_number: formState.IUCNumber,
                 meter_number: formState.meterNumber,
@@ -281,6 +316,14 @@ const PayBillForm: React.FC = () => {
               setSuccessTxHash(txHash);
               setShowSuccessModal(true);
             } else {
+              // Update pending transaction status to failed
+              await axios.post('/api/update-pending-transaction', {
+                hash: txHash,
+                refcode: base_refcode,
+                status: 'failed'
+              });
+
+              // Store failed transaction
               await axios.post('/api/store-transaction', {
                 amount: formState.amount,
                 txn_type: 'Airtime',
@@ -290,6 +333,7 @@ const PayBillForm: React.FC = () => {
                 refcode: base_refcode,
                 timestamp: new Date().toISOString(),
                 refunded: false,
+                used: false,
                 phone_number: formState.phoneNumber,
                 iuc_number: formState.IUCNumber,
                 meter_number: formState.meterNumber,
@@ -318,6 +362,12 @@ const PayBillForm: React.FC = () => {
               }
             }
           } catch (error: any) {
+            // Update pending transaction status to failed
+            await axios.post('/api/update-pending-transaction', {
+              hash: txHash,
+              refcode: base_refcode,
+              status: 'failed'
+            });
             toast.error(error?.message || 'Failed to buy airtime. You will be refunded');
             setIsRefunded(true);
             try {
@@ -344,6 +394,11 @@ const PayBillForm: React.FC = () => {
               networkCode,
               phoneNumber: formState.phoneNumber,
               planId: selectedPlan,
+            }, {
+              headers: {
+                'x-transaction-hash': txHash,
+                'x-reference-code': base_refcode
+              }
             });
 
             if (dataResponse.data.status) {
@@ -356,6 +411,7 @@ const PayBillForm: React.FC = () => {
                 refcode: base_refcode,
                 timestamp: new Date().toISOString(),
                 refunded: false,
+                used: true,
                 phone_number: formState.phoneNumber,
                 iuc_number: formState.IUCNumber,
                 meter_number: formState.meterNumber,
@@ -374,6 +430,7 @@ const PayBillForm: React.FC = () => {
                 refcode: base_refcode,
                 timestamp: new Date().toISOString(),
                 refunded: false,
+                used: true,
                 phone_number: formState.phoneNumber,
                 iuc_number: formState.IUCNumber,
                 meter_number: formState.meterNumber,
@@ -429,6 +486,11 @@ const PayBillForm: React.FC = () => {
               SmartCardNo: formState.IUCNumber,
               PhoneNo: formState.phoneNumber,
               amount: formState.amount,
+            }, {
+              headers: {
+                'x-transaction-hash': txHash,
+                'x-reference-code': base_refcode
+              }
             });
 
             if (cableResponse.data.status) {
@@ -441,6 +503,7 @@ const PayBillForm: React.FC = () => {
                 refcode: base_refcode,
                 timestamp: new Date().toISOString(),
                 refunded: false,
+                used: true,
                 phone_number: formState.phoneNumber,
                 iuc_number: formState.IUCNumber,
                 meter_number: formState.meterNumber,
@@ -459,6 +522,7 @@ const PayBillForm: React.FC = () => {
                 refcode: base_refcode,
                 timestamp: new Date().toISOString(),
                 refunded: false,
+                used: true,
                 phone_number: formState.phoneNumber,
                 iuc_number: formState.IUCNumber,
                 meter_number: formState.meterNumber,
@@ -514,6 +578,11 @@ const PayBillForm: React.FC = () => {
               meter_no: formState.meterNumber,
               amount: formState.amount,
               phone_no: formState.phoneNumber,
+            }, {
+              headers: {
+                'x-transaction-hash': txHash,
+                'x-reference-code': base_refcode
+              }
             });
             if (utilityResponse.data.status) {
               await axios.post('/api/store-transaction', {
@@ -525,6 +594,7 @@ const PayBillForm: React.FC = () => {
                 refcode: base_refcode,
                 timestamp: new Date().toISOString(),
                 refunded: false,
+                used: true,
                 phone_number: formState.phoneNumber,
                 iuc_number: formState.IUCNumber,
                 meter_number: formState.meterNumber,
@@ -543,6 +613,7 @@ const PayBillForm: React.FC = () => {
                 refcode: base_refcode,
                 timestamp: new Date().toISOString(),
                 refunded: false,
+                used: true,
                 phone_number: formState.phoneNumber,
                 iuc_number: formState.IUCNumber,
                 meter_number: formState.meterNumber,
@@ -687,7 +758,7 @@ const PayBillForm: React.FC = () => {
           setFormState={setFormState}
         />
 
-        <div className="hero-card border-[1px] border-stroke rounded-lg flex flex-col gap-3 p-8 backdrop-blur-xl mt-5">
+        <div className="hero-card border-[1px] border-stroke rounded-lg flex flex-col gap-3 p-6 backdrop-blur-xl mt-5">
           {activeTab === 'buy-airtime' && (
             <>
               <InputField
@@ -920,7 +991,7 @@ const PayBillForm: React.FC = () => {
         </div>
 
         <Button
-          className="my-5 py-5 w-full flex gap-2 items-center justify-center"
+          className="mt-5 mb-10 py-5 w-full flex gap-2 items-center justify-center"
           onClick={handlePayment}
           disabled={isBtnLoading || isRefunded}
         >

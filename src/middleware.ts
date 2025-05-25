@@ -1,62 +1,177 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-  // Skip middleware for login page
-  if (req.nextUrl.pathname === '/admin/login') {
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log('Login page - Session:', session?.user?.email);
-    
-    if (session) {
-      const { data: profile, error: profileError } = await supabase
-        .from('admin_users')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-      
-      console.log('Login page - Profile:', profile, 'Error:', profileError);
+// List of protected API routes that require transaction verification
+const PROTECTED_ROUTES = [
+  '/api/buy-airtime',
+  '/api/buy-data',
+  '/api/pay-cable',
+  '/api/pay-utility'
+];
 
-      if (profile?.role === 'admin') {
-        return NextResponse.redirect(new URL('/admin/dashboard', req.url));
-      }
-    }
-    
-    return res;
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // Only check protected routes
+  if (!PROTECTED_ROUTES.includes(path)) {
+    return NextResponse.next();
   }
 
-  // For all other admin routes, check authentication
-  if (req.nextUrl.pathname.startsWith('/admin')) {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    console.log('Admin route - Session:', session?.user?.email, 'Error:', sessionError);
+  try {
+    // Get the transaction hash from the request headers
+    const txHash = request.headers.get('x-transaction-hash');
+    const refcode = request.headers.get('x-reference-code');
 
-    if (!session) {
-      console.log('No session found, redirecting to login');
-      return NextResponse.redirect(new URL('/admin/login', req.url));
+    if (!txHash || !refcode) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: 'Missing transaction verification headers'
+        }),
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
     }
 
-    // Verify admin role
-    const { data: profile, error: profileError } = await supabase
-      .from('admin_users')
-      .select('role')
-      .eq('id', session.user.id)
+    // First check pending_transactions
+    const { data: pendingTx, error: pendingError } = await supabase
+      .from('pending_transactions')
+      .select('*')
+      .eq('hash', txHash)
+      .eq('refcode', refcode)
       .single();
 
-    console.log('Admin route - Profile:', profile, 'Error:', profileError);
+    if (!pendingError && pendingTx) {
+      // If found in pending_transactions, verify it's pending
+      if (pendingTx.status !== 'pending') {
+        return new NextResponse(
+          JSON.stringify({
+            status: false,
+            message: 'Transaction already processed'
+          }),
+          {
+            status: 401,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
 
-    if (!profile || profile.role !== 'admin') {
-      console.log('No admin profile found, signing out and redirecting to login');
-      await supabase.auth.signOut();
-      return NextResponse.redirect(new URL('/admin/login', req.url));
+      // Add transaction info to request headers for the API route to use
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-transaction-verified', 'true');
+      requestHeaders.set('x-transaction-id', pendingTx.id);
+      requestHeaders.set('x-transaction-type', 'pending');
+
+      // Continue to the API route
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     }
-  }
 
-  return res;
+    // If not in pending_transactions, check transactions table
+    const { data: transaction, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('hash', txHash)
+      .eq('refcode', refcode)
+      .single();
+
+    if (error || !transaction) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: 'Invalid transaction'
+        }),
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+
+    // Verify transaction status
+    if (transaction.status !== 'success') {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: 'Transaction not successful'
+        }),
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+
+    // Verify transaction hasn't been used before
+    if (transaction.used) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: 'Transaction already used'
+        }),
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+
+    // Add transaction info to request headers for the API route to use
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-transaction-verified', 'true');
+    requestHeaders.set('x-transaction-id', transaction.id);
+    requestHeaders.set('x-transaction-type', 'completed');
+
+    // Continue to the API route
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return new NextResponse(
+      JSON.stringify({
+        status: false,
+        message: 'Internal server error'
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+  }
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    '/api/buy-airtime',
+    '/api/buy-data',
+    '/api/pay-cable',
+    '/api/pay-utility'
+  ]
 }; 

@@ -49,6 +49,7 @@ export interface Database {
           meter_number: string | null
           network: string | null
           refunded: boolean
+          used: boolean
         }
         Insert: {
           id?: string
@@ -65,13 +66,14 @@ export interface Database {
           error_message?: string | null
           txn_type: string
           wallet_address: string
-        hash: string
-        refcode: string
+          hash: string
+          refcode: string
           phone_number?: string | null
           iuc_number?: string | null
           meter_number?: string | null
           network?: string | null
           refunded?: boolean
+          used?: boolean
         }
         Update: {
           id?: string
@@ -95,6 +97,45 @@ export interface Database {
           meter_number?: string | null
           network?: string | null
           refunded?: boolean
+          used?: boolean
+        }
+      }
+      pending_transactions: {
+        Row: {
+          id: string
+          hash: string
+          refcode: string
+          wallet_address: string
+          amount: number
+          stark_amount: number
+          txn_type: string
+          status: 'pending' | 'completed' | 'failed'
+          created_at: string
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          hash: string
+          refcode: string
+          wallet_address: string
+          amount: number
+          stark_amount: number
+          txn_type: string
+          status?: 'pending' | 'completed' | 'failed'
+          created_at?: string
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          hash?: string
+          refcode?: string
+          wallet_address?: string
+          amount?: number
+          stark_amount?: number
+          txn_type?: string
+          status?: 'pending' | 'completed' | 'failed'
+          created_at?: string
+          completed_at?: string | null
         }
       }
     }
