@@ -56,7 +56,7 @@ export function Providers({ children }: ProvidersProps) {
       provider={provider}
       connectors={connectors}
       explorer={starkscan}
-      autoConnect
+      autoConnect={true}
     >
       <SupabaseProvider>
         {children}

@@ -54,8 +54,9 @@ const PayBillForm: React.FC = () => {
   const [networkCode, setNetworkCode] = useState<string | null>(null);
   const [strkBaseAmount, setStrkBaseAmount] = useState<number | null>(null);
   const [isRefunded, setIsRefunded] = useState<boolean>(false);
+  const [account, setAccount] = useState<any>(null);
 
-  const { address, account } = useAccount();
+  const { address, account: starkAccount } = useAccount();
 
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
   const { chain } = useNetwork();
@@ -167,15 +168,17 @@ const PayBillForm: React.FC = () => {
   };
 
   const handlePayment = useCallback(async () => {
-    if(!isMainnet) {
+    console.log(account);
+    if (!isMainnet) {
       toast.error('You are currently on Testnet.');
       return;
     }
-    if(!isMainnet && parseFloat(formState.amount) > 100) {
+    if (!isMainnet && parseFloat(formState.amount) > 100) {
       toast.error('You are currently on Testnet. Maximum amount is 100');
       return;
     }
     if (!address || !account) {
+      console.log(address, account);
       toast.error('Please connect your wallet to proceed');
       return;
     }
@@ -692,7 +695,7 @@ const PayBillForm: React.FC = () => {
     } finally {
       setIsBtnLoading(false);
     }
-  }, [formState, address, amountInSTRK]);
+  }, [formState, address, amountInSTRK, account]);
 
   const getStarkAmount = useCallback(async () => {
     try {
