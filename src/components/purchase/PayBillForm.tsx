@@ -54,9 +54,7 @@ const PayBillForm: React.FC = () => {
   const [networkCode, setNetworkCode] = useState<string | null>(null);
   const [strkBaseAmount, setStrkBaseAmount] = useState<number | null>(null);
   const [isRefunded, setIsRefunded] = useState<boolean>(false);
-  const [account, setAccount] = useState<any>(null);
-
-  const { address, account: starkAccount } = useAccount();
+  const { address, account } = useAccount();
 
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
   const { chain } = useNetwork();
