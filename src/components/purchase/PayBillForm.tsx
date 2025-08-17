@@ -328,7 +328,7 @@ const PayBillForm: React.FC = () => {
               // Submit STRK to USDT swap request (async)
               try {
                 const swapResponse = await axios.post(`${API_BASE}/swap/submit`, {
-                  amount: strkBaseAmount,
+                  amount: amountInSTRK,
                   fromToken: 'STRK',
                   toToken: 'USDT',
                   userAddress: address,

@@ -54,8 +54,8 @@ async function processSwapQueue() {
 
       // Execute swap
       const result = await autoswappr.executeSwap(
-        job.fromToken as any,
-        job.toToken as any,
+        TOKEN_ADDRESSES.STRK as any,
+        TOKEN_ADDRESSES.USDT as any,
         {
           amount: job.amount,
           isToken1: false,
@@ -120,6 +120,12 @@ initSwapJobsTable();
 router.post('/submit', async (req: Request<{}, {}, SwapRequest>, res: Response): Promise<void> => {
   try {
     const { amount, fromToken, toToken, userAddress, refcode } = req.body;
+
+    console.log({
+      amount,
+      userAddress,
+      refcode
+    })
 
     if (!amount || !fromToken || !toToken || !userAddress) {
       res.status(400).json({
