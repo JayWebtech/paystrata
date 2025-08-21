@@ -13,7 +13,7 @@ try {
 
   // Step 2: Database Setup
   console.log('🗄️  Step 2: Setting up database...');
-  execSync('node scripts/setup.js', { stdio: 'inherit' });
+  execSync('node scripts/init-db.js', { stdio: 'inherit' });
   console.log('✅ Database setup completed\n');
 
   // Step 3: Admin User Setup
