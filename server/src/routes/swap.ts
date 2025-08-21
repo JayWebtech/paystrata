@@ -33,21 +33,21 @@ let isProcessing = false;
 // Process swap jobs in background
 async function processSwapQueue() {
   if (isProcessing || swapQueue.length === 0) return;
-  
+
   isProcessing = true;
-  
+
   while (swapQueue.length > 0) {
     const job = swapQueue.shift();
     if (!job) continue;
-    
+
     try {
       // Update job status to processing
       await updateSwapJobStatus(job.id, 'processing');
-      
+
       // Initialize the SDK
       const autoswappr = new AutoSwappr({
         contractAddress: process.env.AUTOSWAPPR_CONTRACT_ADDRESS!,
-        rpcUrl: process.env.NEXT_PUBLIC_MAINET_RPC!,
+        rpcUrl: "https://starknet-mainnet.public.blastapi.io/rpc/v0_7",
         accountAddress: process.env.NEXT_PRIVATE_STARKPAY_ACCOUNT_ADDRESS!,
         privateKey: process.env.NEXT_PRIVATE_STARKPAY_PRIVATE_KEY!,
       });
@@ -55,7 +55,7 @@ async function processSwapQueue() {
       // Execute swap
       const result = await autoswappr.executeSwap(
         TOKEN_ADDRESSES.STRK as any,
-        TOKEN_ADDRESSES.USDT as any,
+        TOKEN_ADDRESSES.USDC as any,
         {
           amount: job.amount,
           isToken1: false,
@@ -63,16 +63,15 @@ async function processSwapQueue() {
       );
 
       console.log('Swap result:', result);
-      
+
       // Update job as completed
       await updateSwapJobStatus(job.id, 'completed', result);
-      
     } catch (error: any) {
       console.error('Swap failed:', error);
       await updateSwapJobStatus(job.id, 'failed', null, error.message);
     }
   }
-  
+
   isProcessing = false;
 }
 
@@ -122,15 +121,17 @@ router.post('/submit', async (req: Request<{}, {}, SwapRequest>, res: Response):
     const { amount, fromToken, toToken, userAddress, refcode } = req.body;
 
     console.log({
-      amount,
-      userAddress,
-      refcode
-    })
+      "amount": amount,
+      "fromToken": fromToken,
+      "toToken": toToken,
+      "userAddress": userAddress,
+      "refcode": refcode,
+    });
 
     if (!amount || !fromToken || !toToken || !userAddress) {
       res.status(400).json({
         status: false,
-        message: 'Missing required fields: amount, fromToken, toToken, userAddress'
+        message: 'Missing required fields: amount, fromToken, toToken, userAddress',
       });
       return;
     }
@@ -155,7 +156,7 @@ router.post('/submit', async (req: Request<{}, {}, SwapRequest>, res: Response):
       userAddress,
       refcode,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
     };
 
     swapQueue.push(job);
@@ -169,14 +170,13 @@ router.post('/submit', async (req: Request<{}, {}, SwapRequest>, res: Response):
       status: true,
       message: 'Swap request submitted successfully',
       jobId,
-      jobStatus: 'pending'
+      jobStatus: 'pending',
     });
-
   } catch (error: any) {
     console.error('Error submitting swap:', error);
     res.status(500).json({
       status: false,
-      message: 'Failed to submit swap request'
+      message: 'Failed to submit swap request',
     });
   }
 });
@@ -186,15 +186,12 @@ router.get('/status/:jobId', async (req: Request, res: Response): Promise<void> 
   try {
     const { jobId } = req.params;
 
-    const result = await query(
-      'SELECT * FROM swap_jobs WHERE id = $1',
-      [jobId]
-    );
+    const result = await query('SELECT * FROM swap_jobs WHERE id = $1', [jobId]);
 
     if (result.rows.length === 0) {
       res.status(404).json({
         status: false,
-        message: 'Swap job not found'
+        message: 'Swap job not found',
       });
       return;
     }
@@ -214,15 +211,14 @@ router.get('/status/:jobId', async (req: Request, res: Response): Promise<void> 
         result: job.result,
         error: job.error,
         created_at: job.created_at,
-        updated_at: job.updated_at
-      }
+        updated_at: job.updated_at,
+      },
     });
-
   } catch (error: any) {
     console.error('Error checking swap status:', error);
     res.status(500).json({
       status: false,
-      message: 'Failed to check swap status'
+      message: 'Failed to check swap status',
     });
   }
 });
@@ -239,7 +235,7 @@ router.get('/user/:userAddress', async (req: Request, res: Response): Promise<vo
 
     res.json({
       status: true,
-      data: result.rows.map(job => ({
+      data: result.rows.map((job) => ({
         id: job.id,
         status: job.status,
         amount: job.amount,
@@ -250,15 +246,14 @@ router.get('/user/:userAddress', async (req: Request, res: Response): Promise<vo
         result: job.result,
         error: job.error,
         created_at: job.created_at,
-        updated_at: job.updated_at
-      }))
+        updated_at: job.updated_at,
+      })),
     });
-
   } catch (error: any) {
     console.error('Error fetching user swaps:', error);
     res.status(500).json({
       status: false,
-      message: 'Failed to fetch user swaps'
+      message: 'Failed to fetch user swaps',
     });
   }
 });
