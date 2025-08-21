@@ -165,4 +165,38 @@ router.get('/search-txn', authenticateToken, async (req: AuthenticatedRequest, r
   }
 });
 
+// Get all swaps with pagination
+router.get('/swaps', authenticateToken, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    // Fetch swaps with pagination
+    const result = await query(
+      `SELECT * FROM swap_jobs 
+       ORDER BY created_at DESC 
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+
+    // Get total count
+    const countResult = await query('SELECT COUNT(*) FROM swap_jobs');
+    const totalCount = parseInt(countResult.rows[0].count);
+
+    res.json({
+      swaps: result.rows,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        pages: Math.ceil(totalCount / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching swaps:', error);
+    res.status(500).json({ error: 'Failed to fetch swaps' });
+  }
+});
+
 export default router;

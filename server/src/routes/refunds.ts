@@ -184,20 +184,6 @@ router.post(
           resourceBounds,
         });
 
-
-        // const { transaction_hash: txH } = await account0.execute(calls, {
-        //   tip: 1000n,
-        //   version: 3,
-        //   maxFee: 14 ** 18,
-        //   feeDataAvailabilityMode: RPC.EDataAvailabilityMode.L1,
-        //   //tip: 10 ** 13,
-        //   resourceBounds: {
-        //     l2_gas: { max_amount: '0x3beb240', max_price_per_unit: '0x22ecb25c00' },
-        //     l1_gas: { max_amount: '0x0', max_price_per_unit: '0x22ecb25c00' },
-        //     l1_data_gas: { max_amount: '0x120', max_price_per_unit: '0x22ecb25c00' },
-        //   },
-        // });
-
         const txR = await provider.waitForTransaction(txH);
 
         if (txR.isSuccess()) {
@@ -268,15 +254,15 @@ router.post(
 router.post(
   '/',
   async (
-    req: Request<{}, {}, { transaction_id: string; amount: number; reason: string }>,
+    req: Request<{}, {}, { transaction_id: string; amount: number; reason?: string }>,
     res: Response
   ): Promise<void> => {
     try {
       const { transaction_id, amount, reason } = req.body;
 
-      if (!transaction_id || !amount || !reason) {
+      if (!transaction_id || !amount) {
         res.status(400).json({
-          error: 'Missing required fields: transaction_id, amount, reason',
+          error: 'Missing required fields: transaction_id, amount',
         });
         return;
       }
@@ -308,7 +294,7 @@ router.post(
         `INSERT INTO refunds (transaction_id, amount, reason, status) 
        VALUES ($1, $2, $3, 'pending') 
        RETURNING *`,
-        [transaction_id, amount, reason]
+        [transaction_id, amount, reason || null]
       );
 
       // Update transaction as refunded
@@ -328,18 +314,35 @@ router.post(
   }
 );
 
-// Get all refunds
+// Get all refunds with pagination
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    // Get refunds with pagination
     const result = await query(
-      `SELECT r.*, t.txn_type, t.wallet_address 
+      `SELECT r.*, t.txn_type, t.wallet_address, t.refcode 
        FROM refunds r 
        JOIN transactions t ON r.transaction_id = t.id 
-       ORDER BY r.created_at DESC`
+       ORDER BY r.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
 
+    // Get total count
+    const countResult = await query('SELECT COUNT(*) FROM refunds');
+    const totalCount = parseInt(countResult.rows[0].count);
+
     res.json({
-      data: result.rows,
+      refunds: result.rows,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        pages: Math.ceil(totalCount / limit)
+      },
       success: true,
     });
   } catch (error: any) {
@@ -354,34 +357,32 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 router.put('/:id/process', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
 
-    if (!status || !['approved', 'rejected', 'processed'].includes(status)) {
-      res.status(400).json({
-        error: 'Invalid status. Must be approved, rejected, or processed',
-      });
-      return;
-    }
-
-    const result = await query(
-      `UPDATE refunds 
-       SET status = $1, processed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
-       WHERE id = $2 
-       RETURNING *`,
-      [status, id]
-    );
-
-    if (result.rows.length === 0) {
+    // Get the refund record
+    const refundResult = await query('SELECT * FROM refunds WHERE id = $1', [id]);
+    
+    if (refundResult.rows.length === 0) {
       res.status(404).json({
         error: 'Refund not found',
       });
       return;
     }
 
+    const refund = refundResult.rows[0];
+
+    // Update refund status to completed
+    const result = await query(
+      `UPDATE refunds 
+       SET status = 'completed', processed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $1 
+       RETURNING *`,
+      [id]
+    );
+
     res.json({
       data: result.rows[0],
       success: true,
-      message: `Refund ${status} successfully`,
+      message: 'Refund processed successfully',
     });
   } catch (error: any) {
     console.error('Error processing refund:', error);

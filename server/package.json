@@ -9,6 +9,9 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "setup": "node scripts/setup.js",
+    "setup-admin": "node scripts/setup-admin.js",
+    "populate-test-data": "node scripts/populate-test-data.js",
+    "populate-swaps": "node scripts/populate-swaps.js",
     "test": "jest"
   },
   "dependencies": {
