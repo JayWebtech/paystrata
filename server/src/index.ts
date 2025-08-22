@@ -40,6 +40,8 @@ const corsOptions = {
     const allowedOrigins = [
       'https://usepaystrata.com',
       'https://www.usepaystrata.com',
+      'https://usepaystrata.com/',
+      'https://www.usepaystrata.com/',
       'http://localhost:3000',
       'http://localhost:3001',
       'http://127.0.0.1:3000',
@@ -88,6 +90,8 @@ app.get('/api/cors-debug', (req: Request, res: Response) => {
     allowedOrigins: [
       'https://usepaystrata.com',
       'https://www.usepaystrata.com',
+      'https://usepaystrata.com/',
+      'https://www.usepaystrata.com/',
       'http://localhost:3000',
       'http://localhost:3001',
       'http://127.0.0.1:3000',
