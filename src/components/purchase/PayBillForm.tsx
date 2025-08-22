@@ -121,7 +121,7 @@ const PayBillForm: React.FC = () => {
       if (response.status) {
         setTVPlans(response.data);
       } else {
-        toast.error(response?.msg || 'Failed to fetch TV plans');
+        toast.error(response?.data?.msg || 'Failed to fetch TV plans');
       }
     } catch (error: any) {
       toast.error(error?.message || 'Failed to fetch TV plans');
@@ -281,7 +281,7 @@ const PayBillForm: React.FC = () => {
           status: 'pending',
         });
 
-        if (!response?.success) {
+        if (!response?.data?.success) {
           throw new Error('Failed to store pending transaction');
         }
 
