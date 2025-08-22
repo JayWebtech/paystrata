@@ -104,8 +104,8 @@ const PayBillForm: React.FC = () => {
     setIsLoading(true);
     try {
               const response = await axiosInstance.get(`/data/plans?networkCode=${network}`);
-      if (response.data.status) {
-        setDataPlans(response?.data?.data[0]?.PRODUCT);
+      if (response.status) {
+        setDataPlans(response?.data[0]?.PRODUCT);
       }
     } catch (error: any) {
       toast.error(error?.message || 'Failed to fetch data plans');
@@ -118,10 +118,10 @@ const PayBillForm: React.FC = () => {
     setIsLoading(true);
     try {
               const response = await axiosInstance.get(`/cable/plans?provider=${providerCode}`);
-      if (response.data.status) {
-        setTVPlans(response.data.data);
+      if (response.status) {
+        setTVPlans(response.data);
       } else {
-        toast.error(response?.data?.msg || 'Failed to fetch TV plans');
+        toast.error(response?.msg || 'Failed to fetch TV plans');
       }
     } catch (error: any) {
       toast.error(error?.message || 'Failed to fetch TV plans');
@@ -135,8 +135,8 @@ const PayBillForm: React.FC = () => {
     try {
               const response = await axiosInstance.get(`/utility/plans?provider=${providerCode}`);
 
-      if (response.data.status) {
-        setUtilityPlans(response.data.data);
+      if (response.status) {
+        setUtilityPlans(response.data);
         setSelectedUtilityPlan(null);
       } else {
         toast.error('No plans found for this provider');
@@ -281,7 +281,7 @@ const PayBillForm: React.FC = () => {
           status: 'pending',
         });
 
-        if (!response?.data?.success) {
+        if (!response?.success) {
           throw new Error('Failed to store pending transaction');
         }
 
@@ -302,7 +302,7 @@ const PayBillForm: React.FC = () => {
               }
             );
 
-            if (airtimeResponse.data.status) {
+            if (airtimeResponse.status) {
               // Update pending transaction status
               await axiosInstance.put(`/pending-transactions/${base_refcode}/update`, {
                 status: 'completed',

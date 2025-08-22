@@ -29,7 +29,7 @@ const axiosInstance: AxiosInstance = axios.create({
 // );
 
 axiosInstance.interceptors.response.use(
-  (response: AxiosResponse) => response.data,
+  (response: AxiosResponse) => response.data as any,
   (error: AxiosError<ErrorResponse>) => {
     if (error.response) {
       if (error.response.status === 401) {
