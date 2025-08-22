@@ -148,7 +148,7 @@ class AdminService {
 
   // Admin Authentication
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await axiosInstance.post('/api/admin/login', credentials) as LoginResponse;
+    const response = await axiosInstance.post('/admin/login', credentials) as LoginResponse;
     if (response.success && response.token && this.isBrowser()) {
       localStorage.setItem('adminToken', response.token);
       localStorage.setItem('adminUser', JSON.stringify(response.user));
@@ -175,7 +175,7 @@ class AdminService {
 
   // Transactions
   async getTransactions(page: number = 1, limit: number = 10): Promise<TransactionsResponse> {
-    return await axiosInstance.get('/api/admin/transactions', {
+    return await axiosInstance.get('/admin/transactions', {
       headers: this.getAuthHeaders(),
       params: { page, limit }
     }) as TransactionsResponse;
@@ -186,7 +186,7 @@ class AdminService {
     if (reference) params.reference = reference;
     if (walletAddress) params.wallet_address = walletAddress;
 
-    return await axiosInstance.get('/api/admin/search-txn', {
+    return await axiosInstance.get('/admin/search-txn', {
       headers: this.getAuthHeaders(),
       params
     }) as SearchTransactionsResponse;
@@ -194,7 +194,7 @@ class AdminService {
 
   // Pending Transactions
   async getPendingTransactions(page: number = 1, limit: number = 10): Promise<PendingTransactionsResponse> {
-    return await axiosInstance.get('/api/admin/pending-transactions', {
+    return await axiosInstance.get('/admin/pending-transactions', {
       headers: this.getAuthHeaders(),
       params: { page, limit }
     }) as PendingTransactionsResponse;
@@ -202,14 +202,14 @@ class AdminService {
 
   // Refunds
   async getRefunds(page: number = 1, limit: number = 10): Promise<RefundsResponse> {
-    return await axiosInstance.get('/api/refunds', {
+    return await axiosInstance.get('/refunds', {
       headers: this.getAuthHeaders(),
       params: { page, limit }
     }) as RefundsResponse;
   }
 
   async createRefund(transactionId: string, amount: number, reason?: string): Promise<any> {
-    return await axiosInstance.post('/api/refunds', {
+    return await axiosInstance.post('/refunds', {
       transaction_id: transactionId,
       amount,
       reason
@@ -219,21 +219,21 @@ class AdminService {
   }
 
   async processRefund(refundId: string): Promise<any> {
-    return await axiosInstance.put(`/api/refunds/${refundId}/process`, {}, {
+    return await axiosInstance.put(`/refunds/${refundId}/process`, {}, {
       headers: this.getAuthHeaders()
     }) as any;
   }
 
   // Swaps
   async getSwaps(page: number = 1, limit: number = 10): Promise<SwapsResponse> {
-    return await axiosInstance.get('/api/admin/swaps', {
+      return await axiosInstance.get('/admin/swaps', {
       headers: this.getAuthHeaders(),
       params: { page, limit }
     }) as SwapsResponse;
   }
 
   async refundTransaction(refcode: string, amountInSTRK: number, isMainnet: boolean = false): Promise<any> {
-    return await axiosInstance.post('/api/refunds/process', {
+    return await axiosInstance.post('/refunds/process', {
       refcode,
       amountInSTRK,
       isMainet: isMainnet
