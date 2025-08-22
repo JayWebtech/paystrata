@@ -72,8 +72,8 @@ router.get('/plans', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Find the specific provider's data
-    const providerData = tvData[providerCode];
+    // Find the specific provider's data - use the original provider name, not the mapped code
+    const providerData = tvData[provider as string];
     
     if (!providerData || !providerData[0] || !providerData[0].PRODUCT) {
       res.status(404).json({
@@ -110,10 +110,10 @@ router.post('/pay', async (req: Request<{}, {}, CableRequest>, res: Response): P
   try {
     const { provider, iucNumber, planId, amount, phoneNumber } = req.body;
 
-    if (!provider || !iucNumber || !planId || !amount) {
+    if (!provider || !iucNumber || !planId || !amount || !phoneNumber) {
       res.status(400).json({
         status: false,
-        error: 'Missing required fields: provider, iucNumber, planId, amount'
+        error: 'Missing required fields: provider, iucNumber, planId, amount, phoneNumber'
       });
       return;
     }
