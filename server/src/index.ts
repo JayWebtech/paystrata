@@ -31,12 +31,42 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 
+// CORS configuration
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://usepaystrata.com',
+      'https://www.usepaystrata.com',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001'
+    ];
+    
+    // Add custom origins from environment variable
+    if (process.env.CORS_ORIGIN) {
+      const customOrigins = process.env.CORS_ORIGIN.split(',').map(origin => origin.trim());
+      allowedOrigins.push(...customOrigins);
+    }
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'https://usepaystrata.com',
-  credentials: true
-}));
+app.use(cors(corsOptions));
 app.use(limiter);
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
@@ -45,6 +75,27 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// CORS preflight handler
+app.options('*', cors(corsOptions));
+
+// Debug endpoint to check CORS configuration
+app.get('/api/cors-debug', (req: Request, res: Response) => {
+  res.json({
+    origin: req.headers.origin,
+    userAgent: req.headers['user-agent'],
+    allowedOrigins: [
+      'https://usepaystrata.com',
+      'https://www.usepaystrata.com',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : [])
+    ],
+    corsOrigin: process.env.CORS_ORIGIN
+  });
 });
 
 // API routes
