@@ -281,7 +281,9 @@ const PayBillForm: React.FC = () => {
           status: 'pending',
         });
 
-        if (!response?.data?.success) {
+        console.log('response', response);
+
+        if (!(response as any)?.success) {
           throw new Error('Failed to store pending transaction');
         }
 
