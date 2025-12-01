@@ -5,26 +5,33 @@ import { Connector, useAccount, useConnect, useDisconnect } from '@starknet-reac
 import { StarknetkitConnector, useStarknetkitConnectModal } from 'starknetkit';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { Wallet, LogOut, Copy, Check } from 'lucide-react';
 
 interface ConnectWalletButtonProps {
-  size?: 'sm' | 'lg';
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
+/**
+ * ConnectWalletButton Component
+ * Handles wallet connection flow with Starknet
+ * Shows connected state with truncated address and disconnect option
+ */
 const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
-  size = 'sm',
+  size = 'md',
   className = '',
 }) => {
   const router = useRouter();
   const { disconnect } = useDisconnect();
-
   const { connect, connectors, isSuccess } = useConnect();
   const { account, address } = useAccount();
+  const [copied, setCopied] = React.useState(false);
 
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
     connectors: connectors as StarknetkitConnector[],
   });
 
+  // Connect wallet handler
   async function connectWallet() {
     const { connector } = await starknetkitConnectModal();
     try {
@@ -39,27 +46,74 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
     }
   }
 
+  // Copy address to clipboard
+  const copyAddress = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      toast.success('Address copied!');
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  // Redirect to pay-bill on successful connection
   useEffect(() => {
     if (isSuccess && address && account) {
       router.push('/pay-bill');
     }
   }, [isSuccess, address, account, router]);
 
+  // Not connected state
   if (!address) {
     return (
-      <Button size={size} type="default" onClick={connectWallet} className={className}>
-        Connect wallet
+      <Button 
+        size={size} 
+        variant="primary" 
+        onClick={connectWallet} 
+        className={`flex items-center gap-2 ${className}`}
+      >
+        <Wallet className="w-4 h-4" />
+        <span>Connect</span>
       </Button>
     );
   }
 
+  // Connected state
   return (
-    <div className="flex gap-2">
-      <div className="px-3 text-sm bg-gray-100 rounded-lg flex items-center justify-center">
-        {address?.slice(0, 6)}...{address?.slice(-4)}
-      </div>
-      <Button onClick={() => disconnect()} className="px-4 py-2 text-white transition-colors">
-        Disconnect
+    <div className="flex items-center gap-2">
+      {/* Address Display */}
+      <button
+        onClick={copyAddress}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-surface-border hover:border-primary/30 transition-all duration-200 group"
+      >
+        {/* Avatar */}
+        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-[#00A8E8] flex items-center justify-center">
+          <span className="text-xs font-bold text-dark">
+            {address.slice(2, 4).toUpperCase()}
+          </span>
+        </div>
+        
+        {/* Address */}
+        <span className="text-xs text-text-secondary group-hover:text-white transition-colors">
+          {address.slice(0, 2)}...{address.slice(-3)}
+        </span>
+        
+        {/* Copy Icon */}
+        {copied ? (
+          <Check className="w-3.5 h-3.5 text-primary" />
+        ) : (
+          <Copy className="w-3.5 h-3.5 text-text-muted group-hover:text-text-secondary transition-colors" />
+        )}
+      </button>
+
+      {/* Disconnect Button */}
+      <Button 
+        onClick={() => disconnect()} 
+        variant="ghost"
+        size="sm"
+        className="!p-2.5 rounded-xl hover:bg-error/10 hover:text-error"
+      >
+        <LogOut className="w-4 h-4" />
       </Button>
     </div>
   );

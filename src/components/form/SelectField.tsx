@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronDown } from 'lucide-react';
 
 interface Option {
   PRODUCT_ID?: string;
@@ -31,8 +32,14 @@ interface SelectFieldProps {
   networkLogo?: string;
   disabled?: boolean;
   type?: 'dataplan' | 'electric' | 'betting' | 'cable' | 'TV';
+  placeholder?: string;
 }
 
+/**
+ * SelectField Component
+ * Custom styled select dropdown for plans and providers
+ * Supports multiple data types (data plans, TV plans, electricity)
+ */
 export default function SelectField({
   id,
   value,
@@ -43,7 +50,9 @@ export default function SelectField({
   networkLogo,
   disabled,
   type = 'dataplan',
+  placeholder = 'Select an option',
 }: SelectFieldProps) {
+  // Handle change for different value types
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (type === 'dataplan') {
       const selectedOption = options.find(opt => opt.PRODUCT_ID === e.target.value);
@@ -66,6 +75,7 @@ export default function SelectField({
     }
   };
 
+  // Get current value based on type
   const getValue = () => {
     if (type === 'dataplan' && typeof value === 'object') {
       return (value as DataPlanValue).PRODUCT_ID;
@@ -76,32 +86,52 @@ export default function SelectField({
   };
 
   return (
-    <div className="relative mb-4">
+    <div className="mb-4">
+      {/* Label */}
       {label && (
-        <label htmlFor={id} className="block text-white text-sm font-bold mb-2">
+        <label 
+          htmlFor={id} 
+          className="block text-text-secondary text-sm font-medium mb-2"
+        >
           {label}
+          {required && <span className="text-error ml-1">*</span>}
         </label>
       )}
-      <div className="relative w-full">
+      
+      {/* Select Container */}
+      <div className="relative">
+        {/* Network Logo */}
         {networkLogo && (
-          <img
-            src={networkLogo}
-            alt="Network Logo"
-            className="absolute right-1.5 top-1/2 transform rounded-md -translate-y-1/2 w-8 h-8"
-          />
+          <div className="absolute right-12 top-1/2 -translate-y-1/2 z-10">
+            <img
+              src={networkLogo}
+              alt="Network"
+              className="w-7 h-7 rounded-md object-cover"
+            />
+          </div>
         )}
+        
+        {/* Select */}
         <select
           id={id}
           value={getValue()}
           onChange={handleChange}
-          className={`appearance-none text-white ring-2 ring-primary rounded-lg w-full py-3 px-4 text-background leading-tight focus:outline-none focus:ring-2 focus:ring-primary transition-all bg-transparent ${
-            networkLogo ? 'pr-12' : ''
-          }`}
           required={required}
           disabled={disabled}
+          className={`
+            w-full px-4 py-3.5 rounded-xl
+            border border-surface-border
+            text-white text-sm
+            appearance-none cursor-pointer
+            transition-all duration-200
+            hover:border-primary/30
+            focus:outline-none focus:border-primary
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${networkLogo ? 'pr-20' : 'pr-12'}
+          `}
         >
-          <option value="" disabled>
-            Select an option
+          <option value="" disabled className="bg-dark-card text-text-muted">
+            {placeholder}
           </option>
           {options.map((option, index) => (
             <option
@@ -113,19 +143,23 @@ export default function SelectField({
                     ? option.code
                     : option.PACKAGE_ID
               }
+              className="bg-dark-card text-white py-2"
             >
               {type === 'dataplan' ? (
-                <>
-                  {option.PRODUCT_NAME} - ₦{Math.ceil(option.PRODUCT_AMOUNT)}
-                </>
+                `${option.PRODUCT_NAME} - ₦${Math.ceil(option.PRODUCT_AMOUNT)}`
               ) : type === 'electric' ? (
-                <>{option.name}</>
+                option.name
               ) : (
-                <>{option.PACKAGE_NAME}</>
+                option.PACKAGE_NAME
               )}
             </option>
           ))}
         </select>
+        
+        {/* Custom Dropdown Arrow */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+          <ChevronDown className="w-5 h-5 text-text-muted" />
+        </div>
       </div>
     </div>
   );

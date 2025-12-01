@@ -1,6 +1,7 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, CheckCircle, ExternalLink, Copy, Check } from 'lucide-react';
 import Button from '../form/Button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -16,6 +17,11 @@ interface SuccessModalProps {
   txnType: string;
 }
 
+/**
+ * SuccessModal Component
+ * Displays transaction success with receipt details
+ * Features animated entrance and copy functionality
+ */
 const SuccessModal: React.FC<SuccessModalProps> = ({ 
   isOpen, 
   onClose, 
@@ -29,112 +35,175 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   network,
   txnType
 }) => {
+  const [copied, setCopied] = React.useState(false);
+
   if (!isOpen) return null;
 
+  // Open transaction in explorer
   const handleTxClick = () => {
-    if (isMainnet) {
-      window.open(`https://voyager.online/tx/${txHash}`, '_blank');
-    } else {
-      window.open(`https://sepolia.voyager.online/tx/${txHash}`, '_blank');
-    }
+    const baseUrl = isMainnet 
+      ? 'https://voyager.online/tx/' 
+      : 'https://sepolia.voyager.online/tx/';
+    window.open(`${baseUrl}${txHash}`, '_blank');
+  };
+
+  // Copy transaction hash
+  const copyTxHash = () => {
+    navigator.clipboard.writeText(txHash);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-secondary border border-stroke/50 rounded-lg p-6 max-w-md w-full mx-4 relative">
-        <button
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-dark/80 backdrop-blur-sm"
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-400 hover:text-white transition-colors cursor-pointer"
+        />
+
+        {/* Modal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.2 }}
+          className="relative w-full max-w-md glass-card rounded-2xl p-6 shadow-2xl"
         >
-          <X size={20} />
-        </button>
-        
-        <div className="text-center">
-          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          
-          <h3 className="text-xl font-bold text-white mb-2">Transaction Successful!</h3>
-          
-          <div className="bg-black/20 rounded-lg p-4 mb-4 text-left space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Transaction Type</span>
-              <span className="text-sm text-white">{txnType}</span>
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 p-2 rounded-lg text-text-muted hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* Success Icon */}
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-primary" />
             </div>
-            
+            <h3 className="font-syne text-xl font-bold text-white">
+              Transaction Successful!
+            </h3>
+            <p className="text-text-secondary text-sm mt-1">
+              Your {txnType.toLowerCase()} purchase was completed
+            </p>
+          </div>
+
+          {/* Receipt Details */}
+          <div className="bg-dark/40 rounded-xl p-4 space-y-3 mb-6">
+            {/* Transaction Type */}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Amount (NGN)</span>
-              <span className="text-sm text-white">₦{parseFloat(amount).toFixed(2)}</span>
+              <span className="text-text-muted text-sm">Type</span>
+              <span className="text-white text-sm font-medium">{txnType}</span>
             </div>
 
+            {/* Amount NGN */}
+            <div className="flex justify-between items-center">
+              <span className="text-text-muted text-sm">Amount (NGN)</span>
+              <span className="text-white text-sm font-medium">
+                ₦{parseFloat(amount).toLocaleString()}
+              </span>
+            </div>
+
+            {/* Amount STRK */}
             {starkAmount && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-400">Amount (STRK)</span>
-                <span className="text-sm text-white">{starkAmount.toFixed(6)} STRK</span>
+                <span className="text-text-muted text-sm">Amount (STRK)</span>
+                <span className="text-primary text-sm font-medium">
+                  {starkAmount.toFixed(6)} STRK
+                </span>
               </div>
             )}
 
+            {/* Phone Number */}
             {phoneNumber && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-400">Phone Number</span>
-                <span className="text-sm text-white">{phoneNumber}</span>
+                <span className="text-text-muted text-sm">Phone</span>
+                <span className="text-white text-sm">{phoneNumber}</span>
               </div>
             )}
 
+            {/* IUC Number */}
             {iucNumber && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-400">IUC Number</span>
-                <span className="text-sm text-white">{iucNumber}</span>
+                <span className="text-text-muted text-sm">IUC Number</span>
+                <span className="text-white text-sm">{iucNumber}</span>
               </div>
             )}
 
+            {/* Meter Number */}
             {meterNumber && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-400">Meter Number</span>
-                <span className="text-sm text-white">{meterNumber}</span>
+                <span className="text-text-muted text-sm">Meter Number</span>
+                <span className="text-white text-sm">{meterNumber}</span>
               </div>
             )}
 
+            {/* Network */}
             {network && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-400">Network</span>
-                <span className="text-sm text-white">{network}</span>
+                <span className="text-text-muted text-sm">Network</span>
+                <span className="text-white text-sm">{network}</span>
               </div>
             )}
 
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-400">Transaction Hash</span>
-              <button
-                onClick={handleTxClick}
-                className="text-primary hover:text-primary/80 text-sm break-all text-left cursor-pointer"
-              >
-                {txHash}
-              </button>
+            {/* Divider */}
+            <div className="border-t border-surface-border my-2" />
+
+            {/* Transaction Hash */}
+            <div className="space-y-2">
+              <span className="text-text-muted text-sm">Transaction Hash</span>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-xs text-text-secondary bg-dark/60 px-3 py-2 rounded-lg truncate">
+                  {txHash}
+                </code>
+                <button
+                  onClick={copyTxHash}
+                  className="p-2 rounded-lg bg-dark/60 text-text-muted hover:text-primary transition-colors"
+                >
+                  {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
+            {/* Date/Time */}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Date & Time</span>
-              <span className="text-sm text-white">{new Date().toLocaleString()}</span>
+              <span className="text-text-muted text-sm">Date & Time</span>
+              <span className="text-white text-sm">
+                {new Date().toLocaleString()}
+              </span>
             </div>
           </div>
-          
-          <div className="text-xs text-gray-400 mb-4">
-            <p>Thank you for using Paystrata</p>
-            <p className="mt-1">This receipt serves as proof of your transaction</p>
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            <Button
+              onClick={handleTxClick}
+              variant="outline"
+              className="flex-1 flex items-center justify-center gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Explorer
+            </Button>
+            <Button onClick={onClose} className="flex-1">
+              Done
+            </Button>
           </div>
-          
-          <Button
-            onClick={onClose}
-            className="w-full"
-          >
-            Close
-          </Button>
-        </div>
+
+          {/* Footer Note */}
+          <p className="text-center text-text-muted text-xs mt-4">
+            Thank you for using Paystrata
+          </p>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 };
 
-export default SuccessModal; 
+export default SuccessModal;

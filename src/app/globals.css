@@ -1,54 +1,318 @@
 @import 'tailwindcss';
 @config "../../tailwind.config.mjs";
 
+/* ========================================
+   Custom Scrollbar - Sleek Dark Theme
+   ======================================== */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: linear-gradient(180deg, #6c17d4, #a869f4);
-  border-radius: 10px;
+  background: #0a0e17;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #a869f4, #6c17d4);
-  border-radius: 10px;
-  transition: background 0.3s ease;
+  background: linear-gradient(180deg, #00D4AA 0%, #00A8E8 100%);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #6c17d4, #a869f4);
+  background: linear-gradient(180deg, #00F5C4 0%, #00B8F5 100%);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #a869f4 #6c17d4;
+  scrollbar-color: #00D4AA #0a0e17;
 }
 
+/* ========================================
+   Base Styles
+   ======================================== */
 body {
-  font-family: var(--font-sora);
-  background-color: #06000d;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background-color: #0a0e17;
+  color: #ffffff;
+  min-height: 100vh;
 }
 
+/* ========================================
+   Page Wrappers with Mesh Gradient
+   ======================================== */
 .page-wrapper {
-  background-image: url(../../public/img/wrapper.webp);
-  background-position: 50% 0;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-attachment: scroll;
-}
-.page-wrapper2 {
-  background-image: url(../../public/img/wrapper.webp);
-  background-position: 100% 0;
-  background-repeat: no-repeat;
-  background-size: 600% 600%;
-  background-attachment: scroll;
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 170, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0, 168, 232, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 0% 100%, rgba(245, 166, 35, 0.05) 0%, transparent 50%),
+    linear-gradient(180deg, #0a0e17 0%, #0f1520 50%, #0a0e17 100%);
+  background-attachment: fixed;
 }
 
+.page-wrapper2 {
+  background: 
+    radial-gradient(ellipse 100% 80% at 50% 0%, rgba(0, 212, 170, 0.1) 0%, transparent 40%),
+    linear-gradient(180deg, #0a0e17 0%, #0f1520 100%);
+  background-attachment: fixed;
+}
+
+/* ========================================
+   Glass Card Styles
+   ======================================== */
+.glass-card {
+  
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Hero card with subtle glow */
 .hero-card {
-  background-image: radial-gradient(circle, #7b14f933, #864fcb73);
-  box-shadow:
-    inset 4px 4px 10px rgba(255, 255, 255, 0.05),
-    inset -4px -4px 10px rgba(0, 0, 0, 0.15),
-    4px 4px 10px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(
+    145deg,
+    rgba(26, 34, 53, 0.8) 0%,
+    rgba(19, 26, 42, 0.6) 100%
+  );
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ========================================
+   Glow Effects
+   ======================================== */
+.glow-border {
+  position: relative;
+}
+
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.5), rgba(0, 168, 232, 0.3));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glow-border:hover::before {
+  opacity: 1;
+}
+
+/* Pulse glow animation */
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 212, 170, 0.4);
+  }
+}
+
+/* ========================================
+   Button Styles
+   ======================================== */
+.btn-primary {
+  background: linear-gradient(135deg, #00D4AA 0%, #00B894 100%);
+  color: #0a0e17;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 212, 170, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #00F5C4 0%, #00D4AA 100%);
+  box-shadow: 0 6px 20px rgba(0, 212, 170, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(0, 212, 170, 0.5);
+  color: #00D4AA;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: rgba(0, 212, 170, 0.1);
+  border-color: #00D4AA;
+  box-shadow: 0 0 20px rgba(0, 212, 170, 0.2);
+}
+
+/* ========================================
+   Input Styles
+   ======================================== */
+.input-field {
+  background: rgba(10, 14, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #00D4AA;
+  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15);
+}
+
+.input-field::placeholder {
+  color: #64748b;
+}
+
+/* ========================================
+   Text Gradient
+   ======================================== */
+.text-gradient {
+  background: linear-gradient(135deg, #00D4AA 0%, #00A8E8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #F5A623 0%, #FFD700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========================================
+   Tab Styles
+   ======================================== */
+.tab-item {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.tab-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #00D4AA, #00A8E8);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.tab-item.active::after,
+.tab-item:hover::after {
+  width: 100%;
+}
+
+.tab-item.active {
+  color: #00D4AA;
+}
+
+/* ========================================
+   Network/Provider Badge
+   ======================================== */
+.provider-badge {
+  background: rgba(0, 212, 170, 0.1);
+  border: 1px solid rgba(0, 212, 170, 0.3);
+  transition: all 0.2s ease;
+}
+
+.provider-badge:hover,
+.provider-badge.active {
+  background: rgba(0, 212, 170, 0.2);
+  border-color: #00D4AA;
+  box-shadow: 0 0 15px rgba(0, 212, 170, 0.2);
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Stagger animations for lists */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+.border-gradient {
+  border: 1px solid transparent;
+  background: 
+    linear-gradient(#131a2a, #131a2a) padding-box,
+    linear-gradient(135deg, rgba(0, 212, 170, 0.3), rgba(0, 168, 232, 0.2)) border-box;
+}
+
+/* Subtle noise texture overlay */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* Selection styles */
+::selection {
+  background: rgba(0, 212, 170, 0.3);
+  color: #ffffff;
+}
+
+/* Focus visible for accessibility */
+:focus-visible:not(input):not(textarea):not(select) {
+  outline: 4px solid #00D4AA;
+  outline-offset: 2px;
+}
+
+button {
+  cursor: pointer;
 }

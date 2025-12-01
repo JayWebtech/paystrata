@@ -17,8 +17,9 @@ import { nanoid } from 'nanoid';
 import { getSupportedTokens, getContractAddress } from '@/constants/token';
 import { formatSTRKAmount } from '@/utils/formatStrkAmount';
 import TimeoutModal from '../modal/TimeoutModal';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Wallet, ArrowRight } from 'lucide-react';
 import SuccessModal from '../modal/SuccessModal';
+import { motion } from 'framer-motion';
 
 interface FormState {
   phoneNumber: string;
@@ -27,7 +28,13 @@ interface FormState {
   meterNumber: string;
 }
 
+/**
+ * PayBillForm Component
+ * Main payment interface for all utility bill types
+ * Handles airtime, data, cable TV, and electricity payments
+ */
 const PayBillForm: React.FC = () => {
+  // Form state
   const [activeTab, setActiveTab] = useState<string>('buy-airtime');
   const [formState, setFormState] = useState<FormState>({
     phoneNumber: '',
@@ -35,35 +42,42 @@ const PayBillForm: React.FC = () => {
     IUCNumber: '',
     meterNumber: '',
   });
+  
+  // Provider/plan state
   const [networkLogo, setNetworkLogo] = useState<string | null>(null);
   const [dataPlans, setDataPlans] = useState<DataPlan[] | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedTV, setSelectedTV] = useState<TVProvider | null>(null);
   const [tVPlans, setTVPlans] = useState<TVPlan[] | null>(null);
   const [selectedTVPlan, setSelectedTVPlan] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedUtility, setSelectedUtility] = useState<string | null>(null);
   const [utilityPlans, setUtilityPlans] = useState<UtilityPlan[]>([]);
   const [selectedUtilityPlan, setSelectedUtilityPlan] = useState<UtilityPlan | null>(null);
-  const [starkAmount, setStarkAmount] = useState<string | null>(null);
-  const [amountInSTRK, setAmountInSTRK] = useState<number | null>(null);
-  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  
+  // Loading/UI state
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successTxHash, setSuccessTxHash] = useState('');
+  const [isRefunded, setIsRefunded] = useState<boolean>(false);
+  
+  // Price state
+  const [starkAmount, setStarkAmount] = useState<string | null>(null);
+  const [amountInSTRK, setAmountInSTRK] = useState<number | null>(null);
   const [networkCode, setNetworkCode] = useState<string | null>(null);
   const [strkBaseAmount, setStrkBaseAmount] = useState<number | null>(null);
-  const [isRefunded, setIsRefunded] = useState<boolean>(false);
+  
+  // Wallet state
   const { address, account } = useAccount();
-
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
   const { chain } = useNetwork();
   const CONTRACT_ADDRESS = getContractAddress(isMainnet);
   const SUPPORTED_TOKENS = getSupportedTokens(isMainnet);
 
-  // API base URL for the Node.js backend
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api';
 
+  // Detect network provider from phone number
   const detectProvider = useCallback(
     (number: string) => {
       if (number.length >= 4) {
@@ -77,7 +91,7 @@ const PayBillForm: React.FC = () => {
             getDataPlans(provider.name);
           }
         } else {
-          toast.error('You entered an invalid number');
+          toast.error('Invalid phone number');
           setNetworkLogo(null);
         }
       } else {
@@ -88,6 +102,7 @@ const PayBillForm: React.FC = () => {
     [activeTab, dataPlans]
   );
 
+  // Handle input changes
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
@@ -100,10 +115,11 @@ const PayBillForm: React.FC = () => {
     [detectProvider]
   );
 
+  // Fetch data plans
   const getDataPlans = useCallback(async (network: string) => {
     setIsLoading(true);
     try {
-              const response = await axiosInstance.get(`/data/plans?networkCode=${network}`);
+      const response = await axiosInstance.get(`/data/plans?networkCode=${network}`);
       if (response.status) {
         setDataPlans(response?.data[0]?.PRODUCT);
       }
@@ -114,10 +130,11 @@ const PayBillForm: React.FC = () => {
     }
   }, [API_BASE]);
 
+  // Fetch TV plans
   const getTVPlans = useCallback(async (providerCode: string) => {
     setIsLoading(true);
     try {
-              const response = await axiosInstance.get(`/cable/plans?provider=${providerCode}`);
+      const response = await axiosInstance.get(`/cable/plans?provider=${providerCode}`);
       if (response.status) {
         setTVPlans(response.data);
       } else {
@@ -130,11 +147,11 @@ const PayBillForm: React.FC = () => {
     }
   }, [API_BASE]);
 
+  // Fetch utility plans
   const getUtilityPlans = useCallback(async (providerCode: string) => {
     setIsLoading(true);
     try {
-              const response = await axiosInstance.get(`/utility/plans?provider=${providerCode}`);
-
+      const response = await axiosInstance.get(`/utility/plans?provider=${providerCode}`);
       if (response.status) {
         setUtilityPlans(response.data);
         setSelectedUtilityPlan(null);
@@ -149,6 +166,7 @@ const PayBillForm: React.FC = () => {
     }
   }, [API_BASE]);
 
+  // Get transaction type for contract call
   const getTxnType = () => {
     switch (activeTab) {
       case 'buy-data':
@@ -164,8 +182,8 @@ const PayBillForm: React.FC = () => {
     }
   };
 
+  // Handle payment submission
   const handlePayment = async () => {
-    console.log(account);
     if (!isMainnet) {
       toast.error('You are currently on Testnet.');
       return;
@@ -175,7 +193,6 @@ const PayBillForm: React.FC = () => {
       return;
     }
     if (!address || !account) {
-      console.log(address, account);
       toast.error('Please connect your wallet to proceed');
       return;
     }
@@ -226,14 +243,9 @@ const PayBillForm: React.FC = () => {
     let type = getTxnType();
     let txHash = '';
 
-    // Handle the amount as a BigInt with proper decimal places
     const amount = BigInt(amountInSTRK || 0);
     const low = amount & BigInt('0xffffffffffffffffffffffffffffffff');
     const high = amount >> BigInt(128);
-    console.log('low', low);
-    console.log('high', high);
-    console.log('amount', amount, amountInSTRK);
-    console.log('CA', CONTRACT_ADDRESS);
 
     try {
       setIsBtnLoading(true);
@@ -249,21 +261,14 @@ const PayBillForm: React.FC = () => {
           calldata: [refcode.toString(), low.toString(), high.toString(), type?.toString() || ''],
         },
       ];
-      //const feeEstimation = await account.estimateInvokeFee(calls, { version: 3 });
 
-      const result = await account.execute(calls
-      //   {
-      //   version: 3,
-      //   resourceBounds: feeEstimation.resourceBounds,
-      // }
-    );
-      
+      const result = await account.execute(calls);
       txHash = result?.transaction_hash;
 
       const receiptStatus = await account.waitForTransaction(txHash);
 
       if (receiptStatus.statusReceipt === 'success') {
-        // Store in pending_transactions first
+        // Store pending transaction
         const response = await axiosInstance.post(`/pending-transactions/store`, {
           hash: txHash,
           refcode: base_refcode,
@@ -281,12 +286,11 @@ const PayBillForm: React.FC = () => {
           status: 'pending',
         });
 
-        console.log('response', response);
-
         if (!(response as any)?.success) {
           throw new Error('Failed to store pending transaction');
         }
 
+        // Process based on transaction type
         if (activeTab === 'buy-airtime') {
           try {
             const airtimeResponse = await axiosInstance.post(
@@ -305,12 +309,10 @@ const PayBillForm: React.FC = () => {
             );
 
             if (airtimeResponse.status) {
-              // Update pending transaction status
               await axiosInstance.put(`/pending-transactions/${base_refcode}/update`, {
                 status: 'completed',
               });
 
-              // Store in main transactions table
               await axiosInstance.post(`/transactions/store`, {
                 amount: formState.amount,
                 txn_type: 'Airtime',
@@ -327,32 +329,26 @@ const PayBillForm: React.FC = () => {
                 stark_amount: strkBaseAmount,
               });
 
-                              // Submit STRK to USDT swap request (async)
-                try {
-                  const swapResponse = await axiosInstance.post(`/swap/submit`, {
-                    amount: amountInSTRK,
-                    fromToken: 'STRK',
-                    toToken: 'USDT',
-                    userAddress: address,
-                    refcode: base_refcode,
-                  });
+              try {
+                const swapResponse = await axiosInstance.post(`/swap/submit`, {
+                  amount: amountInSTRK,
+                  fromToken: 'STRK',
+                  toToken: 'USDT',
+                  userAddress: address,
+                  refcode: base_refcode,
+                });
+                console.log('Swap request submitted:', swapResponse.data);
+              } catch (swapError) {
+                console.error('Failed to submit swap request:', swapError);
+              }
 
-                  console.log('Swap request submitted:', swapResponse.data);
-                  
-                } catch (swapError) {
-                  console.error('Failed to submit swap request:', swapError);
-                  // Don't fail the main transaction if swap fails
-                }
-              
               setSuccessTxHash(txHash);
               setShowSuccessModal(true);
             } else {
-              // Update pending transaction status to failed
               await axiosInstance.put(`/pending-transactions/${base_refcode}/update`, {
                 status: 'failed',
               });
 
-              // Store failed transaction
               await axiosInstance.post(`/transactions/store`, {
                 amount: formState.amount,
                 txn_type: 'Airtime',
@@ -379,9 +375,7 @@ const PayBillForm: React.FC = () => {
                   amountInSTRK: amountInSTRK,
                 });
                 if (refundResponse.data.status) {
-                  toast.success(
-                    'You refund has been confirmed, please check your wallet for the refund'
-                  );
+                  toast.success('Refund confirmed, please check your wallet');
                 }
               } catch (error: any) {
                 toast.error(error?.message || 'Failed to refund. Our team has been notified');
@@ -390,7 +384,6 @@ const PayBillForm: React.FC = () => {
               }
             }
           } catch (error: any) {
-            // Update pending transaction status to failed
             await axiosInstance.put(`/pending-transactions/${base_refcode}/update`, {
               status: 'failed',
             });
@@ -403,9 +396,7 @@ const PayBillForm: React.FC = () => {
                 amountInSTRK: amountInSTRK,
               });
               if (refundResponse.data.status) {
-                toast.success(
-                  'You refund has been confirmed, please check your wallet for the refund'
-                );
+                toast.success('Refund confirmed, please check your wallet');
               }
             } catch (error: any) {
               toast.error(error?.message || 'Failed to refund. Our team has been notified');
@@ -414,6 +405,7 @@ const PayBillForm: React.FC = () => {
             }
           }
         }
+
         if (activeTab === 'buy-data') {
           try {
             const dataResponse = await axiosInstance.post(
@@ -475,9 +467,7 @@ const PayBillForm: React.FC = () => {
                   amountInSTRK: amountInSTRK,
                 });
                 if (refundResponse.data.status) {
-                  toast.success(
-                    'You refund has been confirmed, please check your wallet for the refund'
-                  );
+                  toast.success('Refund confirmed, please check your wallet');
                 }
               } catch (error: any) {
                 toast.error(error?.message || 'Failed to refund. Our team has been notified');
@@ -495,9 +485,7 @@ const PayBillForm: React.FC = () => {
                 amountInSTRK: amountInSTRK,
               });
               if (refundResponse.data.status) {
-                toast.success(
-                  'You refund has been confirmed, please check your wallet for the refund'
-                );
+                toast.success('Refund confirmed, please check your wallet');
               }
             } catch (error: any) {
               toast.error(error?.message || 'Failed to refund. Our team has been notified');
@@ -569,9 +557,7 @@ const PayBillForm: React.FC = () => {
                   amountInSTRK: amountInSTRK,
                 });
                 if (refundResponse.data.status) {
-                  toast.success(
-                    'You refund has been confirmed, please check your wallet for the refund'
-                  );
+                  toast.success('Refund confirmed, please check your wallet');
                 }
               } catch (error: any) {
                 toast.error(error?.message || 'Failed to refund. Our team has been notified');
@@ -589,9 +575,7 @@ const PayBillForm: React.FC = () => {
                 amountInSTRK: amountInSTRK,
               });
               if (refundResponse.data.status) {
-                toast.success(
-                  'You refund has been confirmed, please check your wallet for the refund'
-                );
+                toast.success('Refund confirmed, please check your wallet');
               }
             } catch (error: any) {
               toast.error(error?.message || 'Failed to refund. Our team has been notified');
@@ -663,9 +647,7 @@ const PayBillForm: React.FC = () => {
                   amountInSTRK: amountInSTRK,
                 });
                 if (refundResponse.data.status) {
-                  toast.success(
-                    'You refund has been confirmed, please check your wallet for the refund'
-                  );
+                  toast.success('Refund confirmed, please check your wallet');
                 }
               } catch (error: any) {
                 toast.error(error?.message || 'Failed to refund. Our team has been notified');
@@ -683,9 +665,7 @@ const PayBillForm: React.FC = () => {
                 amountInSTRK: amountInSTRK,
               });
               if (refundResponse.data.status) {
-                toast.success(
-                  'You refund has been confirmed, please check your wallet for the refund'
-                );
+                toast.success('Refund confirmed, please check your wallet');
               }
             } catch (error: any) {
               toast.error(error?.message || 'Failed to refund. Our team has been notified');
@@ -709,76 +689,92 @@ const PayBillForm: React.FC = () => {
     }
   };
 
+  // Fetch STRK price
   const getStarkAmount = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`/stark-price`);
       if (response?.status) {
         setStarkAmount(response?.data?.starknet?.ngn);
       } else {
-        toast.error(response?.data?.message || 'Failed to fetch Stark amount, try again');
+        toast.error(response?.data?.message || 'Failed to fetch STRK price');
       }
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to fetch Stark amount, try again');
+      toast.error(error?.message || 'Failed to fetch STRK price');
     }
   }, [API_BASE]);
 
+  // Calculate STRK amount when form amount changes
   useEffect(() => {
     if (formState.amount && starkAmount) {
       const ngnAmount = parseFloat(formState.amount);
       const strkPrice = parseFloat(starkAmount);
       const baseStrkAmount = ngnAmount / strkPrice;
-      const feePercentage = 0.05; // 5%
-      const strkAmount = baseStrkAmount + baseStrkAmount * feePercentage;
-      setStrkBaseAmount(strkAmount);
-      const amountInWei = BigInt(Math.floor(strkAmount * 1e18));
+      const feePercentage = 0.05;
+      const strkAmount_ = baseStrkAmount + baseStrkAmount * feePercentage;
+      setStrkBaseAmount(strkAmount_);
+      const amountInWei = BigInt(Math.floor(strkAmount_ * 1e18));
       setAmountInSTRK(Number(amountInWei));
     }
   }, [formState.amount, starkAmount]);
 
+  // Fetch TV plans when provider is selected
   useEffect(() => {
     if (selectedTV) {
       getTVPlans(selectedTV.name);
     }
   }, [selectedTV, getTVPlans]);
 
+  // Initial STRK price fetch
   useEffect(() => {
     getStarkAmount();
   }, [getStarkAmount]);
 
+  // Check network status
   useEffect(() => {
     if (!chain) return;
 
     if (chain.network !== 'mainnet') {
       setIsMainnet(false);
-      toast.error(
-        'You are currently on Testnet. Switch to Starknet Mainnet to make real purchase.',
-        {
-          icon: '🚨',
-        }
-      );
+      toast.error('Switch to Starknet Mainnet to make real purchases.', { icon: '⚠️' });
     } else {
       setIsMainnet(true);
       toast.dismiss();
     }
   }, [chain]);
 
+  // Price timeout modal
   useEffect(() => {
-    const timeoutId = setTimeout(
-      () => {
-        setShowTimeoutModal(true);
-      },
-      15 * 60 * 1000
-    );
+    const timeoutId = setTimeout(() => {
+      setShowTimeoutModal(true);
+    }, 15 * 60 * 1000);
 
-    if(!isBtnLoading) {
+    if (!isBtnLoading) {
       return () => clearTimeout(timeoutId);
     }
   }, []);
 
   return (
-    <div className="container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 pt-10">
-      <div className="max-w-2xl mx-auto">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-lg mx-auto"
+      >
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="font-syne text-2xl sm:text-3xl font-bold text-white mb-2">
+            Pay Your Bills
+          </h1>
+          <p className="text-text-secondary">
+            Fast, secure payments on Starknet
+          </p>
+        </div>
+
+        {/* Loading Indicator */}
         {isLoading && <LoadingIndicator />}
+
+        {/* Tabs */}
         <Tabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -792,7 +788,9 @@ const PayBillForm: React.FC = () => {
           setFormState={setFormState}
         />
 
-        <div className="hero-card border-[1px] border-stroke rounded-lg flex flex-col gap-3 p-6 backdrop-blur-xl mt-5">
+        {/* Form Card */}
+        <div className="glass-card rounded-2xl p-6 mt-4">
+          {/* Airtime Form */}
           {activeTab === 'buy-airtime' && (
             <>
               <InputField
@@ -806,13 +804,12 @@ const PayBillForm: React.FC = () => {
                 max={11}
                 disabled={isBtnLoading || isRefunded}
               />
-
               <InputField
                 id="amount"
                 type="number"
                 name="amount"
-                label="Airtime Amount"
-                placeholder="Enter amount"
+                label="Amount (NGN)"
+                placeholder="Enter amount (min ₦100)"
                 min={100}
                 max={200000}
                 value={formState.amount}
@@ -822,6 +819,7 @@ const PayBillForm: React.FC = () => {
             </>
           )}
 
+          {/* Data Form */}
           {activeTab === 'buy-data' && (
             <>
               <InputField
@@ -849,7 +847,7 @@ const PayBillForm: React.FC = () => {
                       }));
                     }
                   }}
-                  label="Select data plans"
+                  label="Select Data Plan"
                   options={dataPlans}
                   required={true}
                   disabled={isBtnLoading || isRefunded}
@@ -858,25 +856,31 @@ const PayBillForm: React.FC = () => {
             </>
           )}
 
+          {/* Cable TV Form */}
           {activeTab === 'pay-cable' && (
             <>
-              <label className="block text-sm font-bold text-white">Select Cable Provider</label>
-              <div className="flex gap-4 mb-4">
+              <label className="block text-text-secondary text-sm font-medium mb-3">
+                Select Cable Provider
+              </label>
+              <div className="flex gap-3 mb-5">
                 {TVProviders.map((provider) => (
                   <button
                     key={provider.code}
-                    className={`p-2 ring-1 ring-primary rounded-lg flex items-center gap-3 transition-all cursor-pointer duration-200
-                    ${selectedTV?.code === provider?.code ? 'ring-2 bg-primary' : ''}`}
                     onClick={() => {
-                      if (isBtnLoading || isRefunded) {
-                        return null;
-                      }
+                      if (isBtnLoading || isRefunded) return;
                       setSelectedTV({
                         name: provider.name,
                         code: provider.code,
                         img: provider.img,
                       });
                     }}
+                    className={`
+                      flex-1 p-3 rounded-xl border transition-all duration-200
+                      ${selectedTV?.code === provider.code
+                        ? 'border-primary bg-primary/10 shadow-[0_0_15px_rgba(0,212,170,0.2)]'
+                        : 'border-surface-border hover:border-primary/30'
+                      }
+                    `}
                   >
                     <img
                       src={provider.img}
@@ -887,7 +891,9 @@ const PayBillForm: React.FC = () => {
                 ))}
               </div>
 
-              {isLoading && <span className="text-white">Please wait...</span>}
+              {isLoading && (
+                <p className="text-text-muted text-sm mb-4">Loading plans...</p>
+              )}
 
               {tVPlans && !isLoading && (
                 <>
@@ -903,7 +909,7 @@ const PayBillForm: React.FC = () => {
                         }));
                       }
                     }}
-                    label="Select TV plans"
+                    label="Select Plan"
                     options={tVPlans}
                     required={true}
                     type="TV"
@@ -936,6 +942,7 @@ const PayBillForm: React.FC = () => {
             </>
           )}
 
+          {/* Utility Form */}
           {activeTab === 'pay-utility' && (
             <>
               <SelectField
@@ -952,25 +959,27 @@ const PayBillForm: React.FC = () => {
                 type="electric"
                 disabled={isBtnLoading || isRefunded}
               />
+
               {selectedUtility && utilityPlans.length > 0 && (
                 <>
-                  <label className="block text-sm font-bold text-white">Select Plan Type</label>
-                  <div className="flex gap-4 mb-4">
+                  <label className="block text-text-secondary text-sm font-medium mb-3">
+                    Select Plan Type
+                  </label>
+                  <div className="flex gap-3 mb-5">
                     {utilityPlans.map((plan) => (
                       <button
                         key={plan.PRODUCT_ID}
-                        className={`p-2 ring-2 ring-primary text-white rounded-lg transition-all cursor-pointer
-                    ${
-                      selectedUtilityPlan?.PRODUCT_ID === plan.PRODUCT_ID
-                        ? ' bg-primary text-white'
-                        : ''
-                    }`}
                         onClick={() => {
-                          if (isBtnLoading || isRefunded) {
-                            return null;
-                          }
+                          if (isBtnLoading || isRefunded) return;
                           setSelectedUtilityPlan(plan);
                         }}
+                        className={`
+                          flex-1 py-3 px-4 rounded-xl border transition-all duration-200 text-sm font-medium
+                          ${selectedUtilityPlan?.PRODUCT_ID === plan.PRODUCT_ID
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-surface-border hover:border-primary/30 text-text-secondary'
+                          }
+                        `}
                       >
                         {plan.PRODUCT_TYPE.toUpperCase()}
                       </button>
@@ -995,11 +1004,10 @@ const PayBillForm: React.FC = () => {
                     }
                     disabled={isBtnLoading || isRefunded}
                   />
-
                   <InputField
                     id="amount"
                     type="number"
-                    label="Amount"
+                    label="Amount (NGN)"
                     placeholder={`Min: ₦${selectedUtilityPlan.MINIMUN_AMOUNT} - Max: ₦${selectedUtilityPlan.MAXIMUM_AMOUNT}`}
                     name="amount"
                     value={formState.amount}
@@ -1017,28 +1025,53 @@ const PayBillForm: React.FC = () => {
               )}
             </>
           )}
+
+          {/* STRK Amount Display */}
           {starkAmount && address && account && formState?.amount && (
-            <div className="text-white text-sm">
-              You will pay: {formatSTRKAmount(amountInSTRK)} STRK
+            <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20">
+              <div className="flex items-center justify-between">
+                <span className="text-white text-sm">You will pay</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-primary font-syne font-bold text-lg">
+                    {formatSTRKAmount(amountInSTRK)} STRK
+                  </span>
+                </div>
+              </div>
+              <p className="text-white text-xs mt-1">
+                Includes 5% service fee
+              </p>
             </div>
           )}
         </div>
 
+        {/* Submit Button */}
         <Button
-          className="mt-5 mb-10 py-5 w-full flex gap-2 items-center justify-center"
+          className="mt-6 w-full py-4 flex items-center justify-center gap-2"
           onClick={handlePayment}
           disabled={isBtnLoading || isRefunded}
+          size="lg"
         >
           {isBtnLoading || isRefunded ? (
             <>
-              <Loader2 className="animate-spin duration-500" color="white" />
-              {isRefunded ? 'Please wait, refunding...' : 'Please wait'}
+              <Loader2 className="w-5 h-5 animate-spin" />
+              {isRefunded ? 'Processing refund...' : 'Processing...'}
             </>
           ) : (
-            'Pay now'
+            <>
+              <Wallet className="w-5 h-5" />
+              Pay Now
+              <ArrowRight className="w-4 h-4" />
+            </>
           )}
         </Button>
-      </div>
+
+        {/* Security Note */}
+        <p className="text-center text-text-muted text-xs mt-4">
+          Secured by Starknet blockchain
+        </p>
+      </motion.div>
+
+      {/* Modals */}
       <TimeoutModal isOpen={showTimeoutModal} onClose={() => window.location.reload()} />
       <SuccessModal
         isOpen={showSuccessModal}

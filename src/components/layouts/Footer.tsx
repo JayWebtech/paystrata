@@ -1,76 +1,163 @@
 'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MoveUpRight, Twitter } from 'lucide-react';
+import { Twitter, Github, ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
 
-interface FooterItem {
+/**
+ * Footer navigation links
+ */
+interface FooterLink {
   name: string;
-  icon: React.ReactNode;
-  link: string;
+  href: string;
 }
 
-interface SocialMedia {
+const footerLinks: FooterLink[] = [
+  { name: 'Home', href: '/' },
+  { name: 'Pay Bills', href: '/pay-bill' },
+  { name: 'About', href: '/about' },
+  { name: 'Terms', href: '/terms' },
+];
+
+/**
+ * Social media links
+ */
+interface SocialLink {
   name: string;
   icon: React.ReactNode;
-  link: string;
+  href: string;
 }
 
-const footerItems: FooterItem[] = [
-  { name: 'Home', icon: <MoveUpRight size={26} />, link: '/' },
-  { name: 'About Us', icon: <MoveUpRight size={26} />, link: '/about' },
-  {
-    name: 'Terms and Conditions',
-    icon: <MoveUpRight size={26} />,
-    link: '/terms',
-  },
-  {
-    name: 'Join Our Community',
-    icon: <MoveUpRight size={26} />,
-    link: '/community',
+const socialLinks: SocialLink[] = [
+  { 
+    name: 'Twitter', 
+    icon: <Twitter className="w-5 h-5" />, 
+    href: 'https://twitter.com/Paystrata' 
   },
 ];
 
-const socialMedia: SocialMedia[] = [
-  { name: 'Twitter', icon: <Twitter size={40} />, link: 'https://twitter.com' },
-];
-
+/**
+ * Footer Component
+ * Modern minimal footer with navigation, social links, and branding
+ */
 const Footer: React.FC = () => {
-  return (
-    <motion.section
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      className="container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 pt-[2em] lg:py-[4em]"
-    >
-      <div className="hero-card border-[1px] w-full border-stroke rounded-lg flex flex-col gap-5 p-5 py-6 lg:p-[5em] mx-auto sticky mb-2 backdrop-opacity-60 backdrop-blur-3xl">
-        <nav className="flex flex-col gap-10 text-white">
-          {footerItems.map((item, index) => (
-            <a
-              key={index}
-              href={item.link}
-              className="flex items-center gap-2 text-[1.5em] lg:text-[2em] hover:text-primary transition"
-            >
-              {item.name}
-            </a>
-          ))}
-        </nav>
+  const currentYear = new Date().getFullYear();
 
-        <div className="flex gap-4 mt-4 items-center">
-          <span className="text-white text-xl">Follow us on X</span>
-          {socialMedia.map((social, index) => (
-            <a
-              key={index}
-              href={social.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-primary transition"
-            >
-              {social.icon}
-            </a>
-          ))}
+  return (
+    <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="glass-card rounded-3xl p-8 lg:p-12"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-8">
+          {/* Brand Column */}
+          <div className="lg:col-span-2">
+            {/* Logo */}
+            <Link href="/" className="inline-flex items-center gap-2 mb-4">
+              
+              <h2 className="font-syne text-xl font-bold text-white">
+                Pay<span className="text-gradient">strata</span>
+              </h2>
+            </Link>
+            
+            <p className="text-text-secondary max-w-sm mb-6">
+              The future of utility payments. Fast, secure, and decentralized 
+              payments powered by Starknet blockchain technology.
+            </p>
+
+            {/* Social Links */}
+            <div className="flex gap-3">
+              {socialLinks.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-xl bg-surface-light border border-surface-border flex items-center justify-center text-text-secondary hover:text-primary hover:border-primary/30 transition-all duration-200"
+                  aria-label={social.name}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="font-syne text-sm font-semibold text-white uppercase tracking-wider mb-4">
+              Navigation
+            </h3>
+            <ul className="space-y-3">
+              {footerLinks.map((link, index) => (
+                <li key={index}>
+                  <Link 
+                    href={link.href}
+                    className="text-text-secondary hover:text-primary transition-colors duration-200 flex items-center gap-1 group"
+                  >
+                    {link.name}
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Resources */}
+          <div>
+            <h3 className="font-syne text-sm font-semibold text-white uppercase tracking-wider mb-4">
+              Resources
+            </h3>
+            <ul className="space-y-3">
+              <li>
+                <a 
+                  href="https://starknet.io" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-primary transition-colors duration-200 flex items-center gap-1 group"
+                >
+                  Starknet
+                  <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200" />
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://docs.starknet.io" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-primary transition-colors duration-200 flex items-center gap-1 group"
+                >
+                  Documentation
+                  <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200" />
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#" 
+                  className="text-text-secondary hover:text-primary transition-colors duration-200 flex items-center gap-1 group"
+                >
+                  Support
+                  <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200" />
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </motion.section>
+
+        {/* Bottom Bar */}
+        <div className="mt-10 pt-8 border-t border-surface-border flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-text-muted text-sm">
+            © {currentYear} Paystrata. All rights reserved.
+          </p>
+          <div className="flex items-center gap-2 text-text-muted text-sm">
+            <span>Built on</span>
+            <span className="text-primary font-medium">Starknet</span>
+          </div>
+        </div>
+      </motion.div>
+    </footer>
   );
 };
 

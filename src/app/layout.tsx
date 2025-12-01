@@ -1,18 +1,22 @@
-import { Orbitron, Sora } from 'next/font/google';
+import { Syne, Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
 import { ReactNode } from 'react';
 import NextTopLoader from 'nextjs-toploader';
 
-const sora = Sora({
-  variable: '--font-sora',
+// Syne for headings - bold geometric font perfect for crypto/web3
+const syne = Syne({
+  variable: '--font-syne',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
-const orbitron = Orbitron({
-  variable: '--font-orbitron',
+// Inter for body text - clean, modern, highly legible
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
 });
 
 export const metadata = {
@@ -57,9 +61,6 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
-  // verification: {
-  //   google: 'your-google-site-verification',
-  // },
 };
 
 interface RootLayoutProps {
@@ -69,19 +70,27 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className={`${sora.variable} ${orbitron.variable} antialiased`}>
+      <body className={`${syne.variable} ${inter.variable} antialiased`}>
         <NextTopLoader 
-          color="#a869f4"
+          color="#00D4AA"
           initialPosition={0.08}
           crawlSpeed={200}
-          height={3}
+          height={2}
           crawl={true}
           showSpinner={false}
           easing="ease"
           speed={200}
-          shadow="0 0 10px #a869f4,0 0 5px #a869f4"
+          shadow="0 0 10px #00D4AA,0 0 5px #00D4AA"
         />
-        <Toaster />
+        <Toaster 
+          toastOptions={{
+            style: {
+              background: '#000',
+              color: '#fff',
+              border: '1px solid rgba(0, 212, 170, 0.2)',
+            },
+          }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>

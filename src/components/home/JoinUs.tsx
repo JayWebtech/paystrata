@@ -1,73 +1,140 @@
 'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Zap, Layers, Lock } from 'lucide-react';
 
+/**
+ * Card data interface
+ */
 interface Card {
   id: number;
   title: string;
   description: string;
-  button: string;
+  icon: React.ReactNode;
+  accent: string;
 }
 
+/**
+ * Feature cards data
+ */
 const cards: Card[] = [
   {
     id: 1,
-    title: 'Instant Airtime & Data Purchases ⚡',
+    title: 'Instant Payments',
     description:
-      'Buy airtime and mobile data instantly with decentralized transactions on StarkNet. Fast, low-cost, and secure—no middlemen, no delays!',
-    button: 'Buy Now',
+      'Buy airtime and mobile data instantly with decentralized transactions on Starknet. Fast, low-cost, and secure.',
+    icon: <Zap className="w-7 h-7" />,
+    accent: 'primary',
   },
   {
     id: 2,
-    title: 'Powered by StarkNet 🚀',
+    title: 'Powered by Starknet',
     description:
-      "Experience the future of payments with StarkNet's lightning-fast transactions. Decentralized, scalable, and built for efficiency.",
-    button: 'Learn More',
+      "Experience the future of payments with Starknet's lightning-fast transactions. Decentralized, scalable, and efficient.",
+    icon: <Layers className="w-7 h-7" />,
+    accent: '[#00A8E8]',
   },
   {
     id: 3,
-    title: 'Seamless & Secure Payments 🔐',
+    title: 'Secure & Seamless',
     description:
-      'Enjoy hassle-free payments with blockchain security. Say goodbye to traditional banking delays and enjoy smooth, real-time transactions.',
-    button: 'Get Started',
+      'Enjoy hassle-free payments with blockchain security. Say goodbye to traditional banking delays.',
+    icon: <Lock className="w-7 h-7" />,
+    accent: 'accent',
   },
 ];
 
+/**
+ * JoinUs Component
+ * CTA section with feature highlights in a horizontal card layout
+ */
 const JoinUs: React.FC = () => {
   return (
-    <div
-      className={`pt-[2em] lg:pt-[4em] container mx-auto px-4 sm:px-10 md:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-3`}
-    >
-      {cards.map((item, index) => {
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            key={index}
-            className={`hero-card  border-[1px] w-full border-stroke backdrop-blur-lg flex flex-col justify-center items-center gap-5 p-5 lg:p-[2em] mx-auto sticky ${index == 0 ? 'rounded-t-lg lg:rounded-l-lg lg:rounded-t-none' : index == 2 ? 'rounded-b-lg lg:rounded-r-lg lg:rounded-bl-none' : ''}`}
-          >
-            <div className="flex flex-col gap-5 items-center">
-              <motion.h4
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
-                className="font-orbitron text-white text-[1.5em] md:text-[2.2rem] font-bold text-center"
+    <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+      {/* Section Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-12"
+      >
+        <h2 className="font-syne text-3xl sm:text-4xl font-bold text-white mb-4">
+          Ready to Get Started?
+        </h2>
+        <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+          Join thousands of users making seamless crypto payments for everyday utilities
+        </p>
+      </motion.div>
+
+      {/* Cards Container */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 max-w-5xl mx-auto">
+        {cards.map((item, index) => {
+          // Dynamic border radius for connected card effect
+          const borderRadius = index === 0 
+            ? 'rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none' 
+            : index === 2 
+              ? 'rounded-b-2xl lg:rounded-r-2xl lg:rounded-bl-none' 
+              : '';
+          
+          return (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className={`
+                relative group
+                glass-card ${borderRadius}
+                border-surface-border
+                ${index !== 2 ? 'lg:border-r-0' : ''}
+                ${index !== 0 ? 'border-t-0 lg:border-t' : ''}
+                p-8 lg:p-10
+                hover:bg-surface-light/50 transition-colors duration-300
+              `}
+            >
+              {/* Icon */}
+              <div className={`
+                w-14 h-14 rounded-xl
+                bg-${item.accent}/15
+                text-${item.accent}
+                flex items-center justify-center mb-5
+                group-hover:scale-110 transition-transform duration-300
+              `}
+              style={{
+                backgroundColor: item.accent === 'primary' 
+                  ? 'rgba(0, 212, 170, 0.15)' 
+                  : item.accent === '[#00A8E8]' 
+                    ? 'rgba(0, 168, 232, 0.15)' 
+                    : 'rgba(245, 166, 35, 0.15)',
+                color: item.accent === 'primary' 
+                  ? '#00D4AA' 
+                  : item.accent === '[#00A8E8]' 
+                    ? '#00A8E8' 
+                    : '#F5A623',
+              }}
               >
+                {item.icon}
+              </div>
+
+              {/* Content */}
+              <h3 className="font-syne text-xl font-bold text-white mb-3">
                 {item.title}
-              </motion.h4>
-              <motion.p
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
-                className="text-white text-sm lg:text-lg text-center"
-              >
+              </h3>
+              <p className="text-text-secondary leading-relaxed">
                 {item.description}
-              </motion.p>
-            </div>
-          </motion.div>
-        );
-      })}
-    </div>
+              </p>
+
+              {/* Decorative Number */}
+              <div className="absolute top-6 right-6 font-syne text-6xl font-bold text-white/[0.03]">
+                0{item.id}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
   );
 };
 

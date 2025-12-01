@@ -27,12 +27,20 @@ export function Providers({ children }: ProvidersProps) {
   });
 
   const rpc = useCallback((chain: Chain) => {
+    if (chain.id === mainnet.id) {
+      return {
+        nodeUrl: process.env.NEXT_PUBLIC_MAINET_RPC,
+      };
+    } else if (chain.id === sepolia.id) {
+      return {
+        nodeUrl: process.env.NEXT_PUBLIC_SEPOLIA_RPC,
+      };
+    }
     return {
-      nodeUrl: `https://starknet-mainnet.public.blastapi.io`,
-      //nodeUrl: `https://starknet-sepolia.public.blastapi.io`
+      nodeUrl:process.env.NEXT_PUBLIC_MAINET_RPC,
     };
   }, []);
-
+  
   const provider = jsonRpcProvider({ rpc });
 
   const ArgentMobile = ArgentMobileConnector.init({

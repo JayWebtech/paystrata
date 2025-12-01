@@ -5,16 +5,21 @@ import Networks from '@/components/home/Networks';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import Footer from '@/components/layouts/Footer';
 import Navbar from '@/components/layouts/Navbar';
-import Image from 'next/image';
 
+/**
+ * Home Page
+ * Landing page showcasing Paystrata's features and services
+ */
 const Home: React.FC = () => {
   return (
-    <div className="page-wrapper flex flex-col justify-start items-center w-full overflow-hidden">
+    <div className="page-wrapper flex flex-col min-h-screen w-full overflow-hidden">
       <Navbar />
-      <Hero />
-      <WhyChooseUs />
-      <Networks />
-      <JoinUs />
+      <main className="flex-1">
+        <Hero />
+        <WhyChooseUs />
+        <Networks />
+        <JoinUs />
+      </main>
       <Footer />
     </div>
   );
