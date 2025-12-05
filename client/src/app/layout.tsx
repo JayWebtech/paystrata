@@ -72,7 +72,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en">
       <body className={`${syne.variable} ${inter.variable} antialiased`}>
         <NextTopLoader 
-          color="#00D4AA"
+          color="#02ff87"
           initialPosition={0.08}
           crawlSpeed={200}
           height={2}

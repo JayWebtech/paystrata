@@ -9,7 +9,7 @@ export default {
     extend: {
       colors: {
         // Primary accent - Sophisticated teal/cyan
-        primary: '#00D4AA',
+        primary: '#02ff87',
         'primary-light': '#00F5C4',
         'primary-dark': '#00B894',
         'primary-muted': 'rgba(0, 212, 170, 0.15)',

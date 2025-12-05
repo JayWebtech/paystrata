@@ -35,7 +35,7 @@ const Button: React.FC<ButtonProps> = ({
   // Variant classes
   const variantClasses = {
     primary: `
-      bg-gradient-to-r from-primary to-[#00B894]
+      bg-primary
       text-dark font-semibold
       hover:from-primary-light hover:to-primary
       active:scale-[0.98]

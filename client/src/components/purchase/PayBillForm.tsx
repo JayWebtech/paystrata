@@ -1046,7 +1046,7 @@ const PayBillForm: React.FC = () => {
 
         {/* Submit Button */}
         <Button
-          className="mt-6 w-full py-4 flex items-center justify-center gap-2"
+          className="mt-6 w-full py-4 flex items-center justify-center text-sm gap-2"
           onClick={handlePayment}
           disabled={isBtnLoading || isRefunded}
           size="lg"
