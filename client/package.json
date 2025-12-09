@@ -25,7 +25,7 @@
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.477.0",
     "nanoid": "^5.1.5",
-    "next": "15.2.1",
+    "next": "15.2.6",
     "nextjs-toploader": "^3.8.16",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
